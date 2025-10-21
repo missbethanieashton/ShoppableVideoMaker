@@ -25,26 +25,24 @@ const videoFileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFil
   }
 };
 
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, "uploads/");
-    },
-    filename: (req, file, cb) => {
-      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-      cb(null, uniqueSuffix + path.extname(file.originalname));
-    },
-  }),
+const diskStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  },
 });
 
 const imageUpload = multer({
-  storage: upload.storage,
+  storage: diskStorage,
   fileFilter: imageFileFilter,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
 });
 
 const videoUpload = multer({
-  storage: upload.storage,
+  storage: diskStorage,
   fileFilter: videoFileFilter,
   limits: { fileSize: 100 * 1024 * 1024 }, // 100MB limit
 });
