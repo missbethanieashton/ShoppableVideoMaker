@@ -19,12 +19,16 @@
       }
 
       fetch(`${apiUrl}/videos/${videoId}`)
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+          return res.json();
+        })
         .then(video => {
           this.renderPlayer(container, video);
         })
         .catch(err => {
           console.error('Shoppable Video: Failed to load video', err);
+          container.innerHTML = '<p style="color:red;">Failed to load video. Check console for details.</p>';
         });
     },
 
@@ -96,11 +100,17 @@
           container.appendChild(carousel);
         } else {
           fetch(`${this.apiUrl}/products/${placement.productId}`)
-            .then(res => res.json())
+            .then(res => {
+              if (!res.ok) throw new Error(`HTTP ${res.status}`);
+              return res.json();
+            })
             .then(product => {
               this.productCache.set(placement.productId, product);
               const carousel = this.createCarousel(product, video.carouselConfig);
               container.appendChild(carousel);
+            })
+            .catch(err => {
+              console.error('Failed to load product:', err);
             });
         }
       });
