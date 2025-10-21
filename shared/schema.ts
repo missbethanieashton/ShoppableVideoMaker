@@ -38,6 +38,7 @@ export const carouselAnimations = ["none", "hover", "float", "pulse"] as const;
 export const buttonPositions = ["below", "right", "left", "top"] as const;
 export const fontStyles = ["normal", "italic", "bold", "bold-italic"] as const;
 export const fontFamilies = ["default", "league-spartan", "glacial-indifference", "lacquer"] as const;
+export const textAnimations = ["none", "typewriter-slow", "typewriter-medium", "typewriter-fast", "glow"] as const;
 
 export type CarouselPosition = typeof carouselPositions[number];
 export type ThumbnailShape = typeof thumbnailShapes[number];
@@ -45,6 +46,7 @@ export type CarouselAnimation = typeof carouselAnimations[number];
 export type ButtonPosition = typeof buttonPositions[number];
 export type FontStyle = typeof fontStyles[number];
 export type FontFamily = typeof fontFamilies[number];
+export type TextAnimation = typeof textAnimations[number];
 
 export interface CarouselConfig {
   position: CarouselPosition;
@@ -74,6 +76,8 @@ export interface CarouselConfig {
   thumbnailContentGap: number; // Gap between thumbnail and content in pixels (4-24px)
   contentButtonGap: number; // Gap between content and button in pixels (4-24px)
   carouselPadding: number; // Inner padding of carousel container (8-24px)
+  textAnimation: TextAnimation; // Animation for title, price, and button text
+  enableScroll: boolean; // Enable scrolling between title, price, and button text
 }
 
 // Product placement schema (products on timeline)
@@ -132,6 +136,8 @@ export const defaultCarouselConfig: CarouselConfig = {
   thumbnailContentGap: 12, // Default 12px gap between thumbnail and content
   contentButtonGap: 12, // Default 12px gap between content and button
   carouselPadding: 12, // Default 12px inner padding
+  textAnimation: "none", // Default no text animation
+  enableScroll: false, // Default no scrolling
 };
 
 // Analytics events schema
