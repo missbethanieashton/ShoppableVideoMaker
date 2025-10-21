@@ -1069,14 +1069,60 @@ function ProductCarouselOverlay({ product, config }: { product: Product; config:
   const getAnimationClass = () => {
     switch (config.animation) {
       case 'hover':
-        return 'transition-transform hover:scale-105';
+        return 'animate-[slow-drift_6s_ease-in-out_infinite]';
       case 'float':
-        return 'animate-bounce';
+        return 'animate-[gentle-float_3s_ease-in-out_infinite]';
       case 'pulse':
-        return 'animate-pulse';
+        return 'animate-[soft-pulse_2s_ease-in-out_infinite]';
       default:
         return '';
     }
+  };
+
+  const buttonPos = config.buttonPosition || 'below';
+  
+  const renderButton = () => {
+    if (!config.showButton) return null;
+    return (
+      <button
+        style={{
+          backgroundColor: config.buttonBackgroundColor,
+          color: config.buttonTextColor,
+          fontSize: `${config.buttonFontSize}px`,
+          fontWeight: config.buttonFontWeight,
+          fontStyle: config.buttonFontStyle || 'normal',
+          borderRadius: `${config.buttonBorderRadius}px`,
+        }}
+        className="px-3 py-1"
+      >
+        {config.buttonText}
+      </button>
+    );
+  };
+
+  const renderContent = () => {
+    return (
+      <>
+        <img
+          src={product.thumbnailUrl}
+          alt={product.title}
+          className="object-cover"
+          style={getThumbnailStyle()}
+        />
+        <div className="flex-1 min-w-0 space-y-1">
+          {config.showTitle && (
+            <p className="text-sm font-semibold line-clamp-2" style={{ fontStyle: config.titleFontStyle || 'normal' }}>{product.title}</p>
+          )}
+          {config.showPrice && (
+            <p className="text-sm font-semibold text-primary">{product.price}</p>
+          )}
+          {config.showDescription && product.description && (
+            <p className="text-xs text-muted-foreground line-clamp-2">{product.description}</p>
+          )}
+          {buttonPos === 'below' && renderButton()}
+        </div>
+      </>
+    );
   };
 
   return (
@@ -1087,38 +1133,15 @@ function ProductCarouselOverlay({ product, config }: { product: Product; config:
         maxWidth: `${config.carouselWidth || 250}px`
       }}
     >
-      <div className="flex gap-3">
-        <img
-          src={product.thumbnailUrl}
-          alt={product.title}
-          className="object-cover"
-          style={getThumbnailStyle()}
-        />
-        <div className="flex-1 min-w-0 space-y-1">
-          {config.showTitle && (
-            <p className="text-sm font-semibold line-clamp-2">{product.title}</p>
-          )}
-          {config.showPrice && (
-            <p className="text-sm font-semibold text-primary">{product.price}</p>
-          )}
-          {config.showDescription && product.description && (
-            <p className="text-xs text-muted-foreground line-clamp-2">{product.description}</p>
-          )}
-          {config.showButton && (
-            <button
-              style={{
-                backgroundColor: config.buttonBackgroundColor,
-                color: config.buttonTextColor,
-                fontSize: `${config.buttonFontSize}px`,
-                fontWeight: config.buttonFontWeight,
-                borderRadius: `${config.buttonBorderRadius}px`,
-              }}
-              className="px-3 py-1 mt-2"
-            >
-              {config.buttonText}
-            </button>
-          )}
+      {buttonPos === 'top' && (
+        <div className="mb-2 w-full">
+          {renderButton()}
         </div>
+      )}
+      <div className={`flex gap-3 ${buttonPos === 'left' || buttonPos === 'right' ? 'items-center' : ''}`}>
+        {buttonPos === 'left' && <div>{renderButton()}</div>}
+        {renderContent()}
+        {buttonPos === 'right' && <div>{renderButton()}</div>}
       </div>
     </div>
   );

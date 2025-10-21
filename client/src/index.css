@@ -2,6 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Shoppable Video Animations */
+@keyframes slow-drift {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(3px, -3px); }
+  50% { transform: translate(-2px, 2px); }
+  75% { transform: translate(2px, 3px); }
+}
+
+@keyframes gentle-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes soft-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
 /* LIGHT MODE */
 :root {
   --button-outline: rgba(0,0,0, .10);

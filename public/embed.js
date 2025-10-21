@@ -4,31 +4,33 @@
     const style = document.createElement('style');
     style.id = 'shoppable-video-styles';
     style.textContent = `
-      @keyframes float {
+      @keyframes slow-drift {
+        0%, 100% { transform: translate(0, 0); }
+        25% { transform: translate(3px, -3px); }
+        50% { transform: translate(-2px, 2px); }
+        75% { transform: translate(2px, 3px); }
+      }
+      
+      @keyframes gentle-float {
         0%, 100% { transform: translateY(0px); }
         50% { transform: translateY(-10px); }
       }
       
-      @keyframes pulse {
+      @keyframes soft-pulse {
         0%, 100% { transform: scale(1); }
         50% { transform: scale(1.05); }
       }
       
       .shoppable-carousel.animation-hover {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-      }
-      
-      .shoppable-carousel.animation-hover:hover {
-        transform: scale(1.05);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.25) !important;
+        animation: slow-drift 6s ease-in-out infinite;
       }
       
       .shoppable-carousel.animation-float {
-        animation: float 3s ease-in-out infinite;
+        animation: gentle-float 3s ease-in-out infinite;
       }
       
       .shoppable-carousel.animation-pulse {
-        animation: pulse 2s ease-in-out infinite;
+        animation: soft-pulse 2s ease-in-out infinite;
       }
     `;
     document.head.appendChild(style);
@@ -212,6 +214,7 @@
         title.textContent = product.title;
         title.style.fontSize = '14px';
         title.style.fontWeight = '600';
+        title.style.fontStyle = config.titleFontStyle || 'normal';
         title.style.margin = '0';
         title.style.lineHeight = '1.4';
         title.style.color = '#000';
@@ -238,29 +241,94 @@
         info.appendChild(description);
       }
 
+      // Create button if needed
+      let button = null;
       if (config.showButton) {
-        const button = document.createElement('a');
+        button = document.createElement('a');
         button.href = product.url;
         button.target = '_blank';
         button.rel = 'noopener noreferrer';
         button.textContent = config.buttonText;
         button.style.display = 'inline-block';
         button.style.padding = '6px 12px';
-        button.style.marginTop = '8px';
         button.style.backgroundColor = config.buttonBackgroundColor;
         button.style.color = config.buttonTextColor;
         button.style.fontSize = `${config.buttonFontSize}px`;
         button.style.fontWeight = config.buttonFontWeight;
+        button.style.fontStyle = config.buttonFontStyle || 'normal';
         button.style.borderRadius = `${config.buttonBorderRadius}px`;
         button.style.textDecoration = 'none';
         button.style.cursor = 'pointer';
         button.style.border = 'none';
-        info.appendChild(button);
       }
 
-      content.appendChild(thumbnail);
-      content.appendChild(info);
-      carousel.appendChild(content);
+      // Layout based on button position
+      const buttonPos = config.buttonPosition || 'below';
+      if (buttonPos === 'below') {
+        // Default: button below info
+        content.appendChild(thumbnail);
+        content.appendChild(info);
+        if (button) {
+          button.style.marginTop = '8px';
+          info.appendChild(button);
+        }
+        carousel.appendChild(content);
+      } else if (buttonPos === 'right') {
+        // Button to the right of content
+        content.appendChild(thumbnail);
+        content.appendChild(info);
+        carousel.appendChild(content);
+        if (button) {
+          button.style.marginLeft = '8px';
+          button.style.alignSelf = 'center';
+          const wrapper = document.createElement('div');
+          wrapper.style.display = 'flex';
+          wrapper.style.alignItems = 'center';
+          wrapper.style.gap = '8px';
+          carousel.innerHTML = '';
+          wrapper.appendChild(content);
+          wrapper.appendChild(button);
+          carousel.appendChild(wrapper);
+        }
+      } else if (buttonPos === 'left') {
+        // Button to the left of content
+        content.appendChild(thumbnail);
+        content.appendChild(info);
+        if (button) {
+          button.style.marginRight = '8px';
+          button.style.alignSelf = 'center';
+          const wrapper = document.createElement('div');
+          wrapper.style.display = 'flex';
+          wrapper.style.alignItems = 'center';
+          wrapper.style.gap = '8px';
+          wrapper.appendChild(button);
+          wrapper.appendChild(content);
+          carousel.appendChild(wrapper);
+        } else {
+          carousel.appendChild(content);
+        }
+      } else if (buttonPos === 'top') {
+        // Button above content
+        if (button) {
+          button.style.marginBottom = '8px';
+          button.style.display = 'block';
+          button.style.width = '100%';
+          button.style.textAlign = 'center';
+          carousel.appendChild(button);
+        }
+        content.appendChild(thumbnail);
+        content.appendChild(info);
+        carousel.appendChild(content);
+      } else {
+        // Fallback to below
+        content.appendChild(thumbnail);
+        content.appendChild(info);
+        if (button) {
+          button.style.marginTop = '8px';
+          info.appendChild(button);
+        }
+        carousel.appendChild(content);
+      }
 
       carousel.style.cursor = config.showButton ? 'default' : 'pointer';
       
