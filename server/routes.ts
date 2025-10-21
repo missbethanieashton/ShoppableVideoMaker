@@ -48,7 +48,13 @@ const videoUpload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  app.use("/uploads", express.static("uploads"));
+  // Serve uploads directory with explicit CORS headers for embed compatibility
+  app.use("/uploads", (req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    next();
+  }, express.static("uploads"));
+  
+  // Serve public directory (embed.js) with CORS headers
   app.use(express.static("public"));
 
   app.get("/api/products", async (req, res) => {
