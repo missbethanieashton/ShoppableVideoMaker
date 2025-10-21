@@ -1,8 +1,7 @@
 import { useState, useRef, DragEvent, ChangeEvent } from "react";
-import { Upload, X, Image as ImageIcon, Film } from "lucide-react";
+import { Upload, X, Image as ImageIcon, Film, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { apiRequest } from "@/lib/queryClient";
 
 interface FileUploadProps {
   type: "image" | "video";
@@ -15,6 +14,7 @@ export function FileUpload({ type, value, onChange, className }: FileUploadProps
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [preview, setPreview] = useState<string | undefined>(value);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const accept = type === "image" 
@@ -52,6 +52,7 @@ export function FileUpload({ type, value, onChange, className }: FileUploadProps
 
   const handleFileUpload = async (file: File) => {
     setIsUploading(true);
+    setError(null);
     
     try {
       const formData = new FormData();
@@ -62,16 +63,19 @@ export function FileUpload({ type, value, onChange, className }: FileUploadProps
         body: formData,
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Upload failed");
+        throw new Error(data.error || "Upload failed");
       }
 
-      const data = await response.json();
       const url = type === "image" ? data.imageUrl : data.videoUrl;
       
       setPreview(url);
       onChange(url);
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Upload failed";
+      setError(errorMessage);
       console.error("Upload error:", error);
     } finally {
       setIsUploading(false);
@@ -121,19 +125,20 @@ export function FileUpload({ type, value, onChange, className }: FileUploadProps
   }
 
   return (
-    <div
-      className={cn(
-        "border-2 border-dashed rounded-md p-8 text-center cursor-pointer transition-colors",
-        isDragging && "border-primary bg-primary/5",
-        isUploading && "opacity-50 cursor-not-allowed",
-        className
-      )}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-      onClick={handleClick}
-      data-testid="dropzone-file-upload"
-    >
+    <div className={cn("space-y-2", className)}>
+      <div
+        className={cn(
+          "border-2 border-dashed rounded-md p-8 text-center cursor-pointer transition-colors",
+          isDragging && "border-primary bg-primary/5",
+          isUploading && "opacity-50 cursor-not-allowed",
+          error && "border-destructive"
+        )}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onClick={handleClick}
+        data-testid="dropzone-file-upload"
+      >
       <input
         ref={fileInputRef}
         type="file"
@@ -169,6 +174,13 @@ export function FileUpload({ type, value, onChange, className }: FileUploadProps
         
         <Upload className="w-4 h-4 text-muted-foreground" />
       </div>
+      </div>
+      {error && (
+        <div className="flex items-center gap-2 text-sm text-destructive" data-testid="text-upload-error">
+          <AlertCircle className="w-4 h-4" />
+          <span>{error}</span>
+        </div>
+      )}
     </div>
   );
 }
