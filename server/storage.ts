@@ -34,7 +34,11 @@ export class MemStorage implements IStorage {
 
   async createProduct(insertProduct: InsertProduct): Promise<Product> {
     const id = randomUUID();
-    const product: Product = { ...insertProduct, id };
+    const product: Product = { 
+      ...insertProduct, 
+      id,
+      description: insertProduct.description ?? null 
+    };
     this.products.set(id, product);
     return product;
   }
@@ -53,7 +57,11 @@ export class MemStorage implements IStorage {
 
   async createVideo(insertVideo: InsertVideo): Promise<Video> {
     const id = randomUUID();
-    const video: Video = { ...insertVideo, id };
+    const video: Video = { 
+      ...insertVideo, 
+      id,
+      thumbnailUrl: insertVideo.thumbnailUrl ?? null 
+    };
     this.videos.set(id, video);
     return video;
   }

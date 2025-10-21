@@ -142,6 +142,7 @@ export default function ProductInventory() {
                           placeholder="Product description"
                           data-testid="input-product-description"
                           {...field}
+                          value={field.value ?? ""}
                         />
                       </FormControl>
                       <FormMessage />

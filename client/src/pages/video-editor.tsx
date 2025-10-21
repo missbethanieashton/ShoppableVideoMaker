@@ -163,13 +163,13 @@ export default function VideoEditor() {
         return apiRequest("PATCH", `/api/videos/${params.id}`, data);
       }
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/videos"] });
       toast({
         title: "Video saved",
         description: "Your video has been saved successfully.",
       });
-      if (isNew && data) {
+      if (isNew && data?.id) {
         navigate(`/editor/${data.id}`);
       }
     },
