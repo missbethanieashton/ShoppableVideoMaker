@@ -123,22 +123,27 @@ export default function VideoEditor() {
     mutationFn: async () => {
       let finalVideoUrl = videoFile || "";
 
-      if (isNew && videoFileObject) {
+      if (videoFileObject) {
         setIsUploading(true);
-        const formData = new FormData();
-        formData.append("video", videoFileObject);
+        try {
+          const formData = new FormData();
+          formData.append("video", videoFileObject);
 
-        const uploadResponse = await fetch("/api/upload/video", {
-          method: "POST",
-          body: formData,
-        });
+          const uploadResponse = await fetch("/api/upload/video", {
+            method: "POST",
+            body: formData,
+          });
 
-        if (!uploadResponse.ok) {
-          throw new Error("Failed to upload video");
+          if (!uploadResponse.ok) {
+            throw new Error("Failed to upload video");
+          }
+
+          const { videoUrl } = await uploadResponse.json();
+          finalVideoUrl = videoUrl;
+        } catch (error) {
+          setIsUploading(false);
+          throw error;
         }
-
-        const { videoUrl } = await uploadResponse.json();
-        finalVideoUrl = videoUrl;
         setIsUploading(false);
       }
 
@@ -167,6 +172,14 @@ export default function VideoEditor() {
       if (isNew && data) {
         navigate(`/editor/${data.id}`);
       }
+    },
+    onError: (error) => {
+      setIsUploading(false);
+      toast({
+        title: "Save failed",
+        description: error instanceof Error ? error.message : "Failed to save video",
+        variant: "destructive",
+      });
     },
   });
 

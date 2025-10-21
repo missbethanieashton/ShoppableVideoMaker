@@ -102,9 +102,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/videos/:id", async (req, res) => {
     try {
-      const video = await storage.updateVideo(req.params.id, req.body);
+      const partialVideoSchema = insertVideoSchema.partial();
+      const data = partialVideoSchema.parse(req.body);
+      const video = await storage.updateVideo(req.params.id, data);
       res.json(video);
     } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
       res.status(500).json({ error: "Failed to update video" });
     }
   });

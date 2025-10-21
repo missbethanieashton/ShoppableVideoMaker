@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Plus, Play, Code, Trash2, Video } from "lucide-react";
+import { Plus, Play, Code, Trash2, Video as VideoIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -74,7 +74,7 @@ export default function VideoLibrary() {
       <div className="flex-1 overflow-auto p-6">
         {!videos || videos.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
-            <Video className="w-16 h-16 text-muted-foreground mb-4" />
+            <VideoIcon className="w-16 h-16 text-muted-foreground mb-4" />
             <h2 className="text-xl font-semibold mb-2">No videos yet</h2>
             <p className="text-muted-foreground mb-6 max-w-md">
               Create your first shoppable video by uploading a video and adding products
