@@ -500,15 +500,15 @@ export default function VideoEditor() {
           )}
         </div>
 
-        <div className="w-96 border-l bg-card flex flex-col">
-          <Tabs defaultValue="carousel" className="flex-1 flex flex-col">
+        <div className="w-96 border-l bg-card flex flex-col overflow-hidden">
+          <Tabs defaultValue="carousel" className="flex-1 flex flex-col overflow-hidden">
             <TabsList className="m-4 grid grid-cols-2">
               <TabsTrigger value="carousel" data-testid="tab-carousel">Carousel</TabsTrigger>
               <TabsTrigger value="products" data-testid="tab-products">Products</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="carousel" className="flex-1 m-0 overflow-auto">
-              <ScrollArea className="h-full">
+            <TabsContent value="carousel" className="flex-1 m-0 overflow-y-auto">
+              <div className="h-full">
                 <div className="p-4 space-y-6">
                   <div className="space-y-4">
                     <h3 className="font-semibold">Position</h3>
@@ -784,11 +784,11 @@ export default function VideoEditor() {
                     </div>
                   )}
                 </div>
-              </ScrollArea>
+              </div>
             </TabsContent>
 
-            <TabsContent value="products" className="flex-1 m-0 overflow-auto">
-              <ScrollArea className="h-full">
+            <TabsContent value="products" className="flex-1 m-0 overflow-y-auto">
+              <div className="h-full">
                 <div className="p-4 space-y-3">
                   {selectedPlacement && (() => {
                     const product = products?.find(p => p.id === selectedPlacement.productId);
@@ -886,7 +886,7 @@ export default function VideoEditor() {
                     })}
                   </div>
                 </div>
-              </ScrollArea>
+              </div>
             </TabsContent>
           </Tabs>
         </div>
