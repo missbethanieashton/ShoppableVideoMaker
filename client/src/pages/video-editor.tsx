@@ -57,7 +57,7 @@ export default function VideoEditor() {
       setVideoTitle(video.title);
       setVideoFile(video.videoUrl);
       setVideoDuration(video.duration);
-      setCarouselConfig(video.carouselConfig);
+      setCarouselConfig({ ...defaultCarouselConfig, ...video.carouselConfig });
       setProductPlacements(video.productPlacements);
     }
   }, [video, isNew]);
@@ -142,6 +142,9 @@ export default function VideoEditor() {
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/videos"] });
+      if (!isNew) {
+        queryClient.invalidateQueries({ queryKey: ["/api/videos", params.id] });
+      }
       toast({
         title: "Video saved",
         description: "Your video has been saved successfully.",

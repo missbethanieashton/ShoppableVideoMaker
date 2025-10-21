@@ -22,9 +22,10 @@ A professional admin interface for creating interactive shoppable videos with cu
 - **Carousel Customization Suite**: 
   - Position selector (9 positions including top-right, top-center, side-right, etc.)
   - Thumbnail shape options (square, circle, portrait)
+  - Thumbnail size slider (32-128px, default 64px)
   - Corner radius control (0-24px)
   - Content visibility toggles (title, price, description, button)
-  - Button styling (text, colors, font size, font weight)
+  - Button styling (text, colors, font size, font weight, border radius)
 - **Embed Code Generator**: 
   - Generates JavaScript embed code after publishing
   - Shows embed code in publish dialog
@@ -69,10 +70,18 @@ A professional admin interface for creating interactive shoppable videos with cu
 - **Product**: id, title, price, description, url, thumbnailUrl
 - **Video**: id, title, videoUrl, duration, thumbnailUrl, published, carouselConfig, productPlacements
 - **ProductPlacement**: id, productId, startTime, endTime
-- **CarouselConfig**: position, thumbnailShape, cornerRadius, visibility flags, button styling
+- **CarouselConfig**: position, thumbnailShape, thumbnailSize, cornerRadius, visibility flags, button styling (including buttonBorderRadius)
 - **AnalyticsEvent**: id, videoId, productId, eventType (view/product_click), timestamp, metadata
 
 ## Recent Changes
+- Carousel Styling Bug Fixes & Enhancements (October 21, 2025)
+  - **Critical Bug Fix**: Added NaN validation to number inputs (buttonFontSize, buttonBorderRadius, thumbnailSize) to prevent app crashes when inputs are cleared
+  - **New Feature**: Thumbnail size slider (32-128px, step 4px, default 64px) with real-time preview
+  - **New Feature**: Button border radius control added to UI (was in schema but missing from interface)
+  - **Bug Fix**: Fixed query cache invalidation - save now properly refreshes UI with latest backend data
+  - **Bug Fix**: Carousel config now merges with defaults on load, ensuring backward compatibility for videos created before new fields were added
+  - Dynamic thumbnail sizing applies to all shapes (square, circle, portrait) in both editor preview and embed player
+  - Database migration: All existing videos updated with thumbnailSize field (default 64px)
 - Video Editor Enhancements (October 21, 2025)
   - Draggable product placements on timeline with smooth cursor tracking
   - Resizable placements via edge handles (minimum 1 second duration)
@@ -121,9 +130,11 @@ A professional admin interface for creating interactive shoppable videos with cu
 ## Default Carousel Configuration
 - Position: Top Right
 - Thumbnail Shape: Square
+- Thumbnail Size: 64px
 - Corner Radius: 0px
 - Show Title: No
 - Show Price: No
 - Show Description: No
 - Show Button: No
+- Button Border Radius: 4px
 - Only thumbnails visible by default
