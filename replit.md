@@ -23,7 +23,11 @@ A professional admin interface for creating interactive shoppable videos with cu
   - Position selector (9 positions including top-right, top-center, side-right, etc.)
   - Thumbnail shape options (square, circle, portrait)
   - Thumbnail size slider (32-128px, default 64px)
+  - Carousel width control (32-250px, default 250px)
   - Corner radius control (0-24px)
+  - Transparent background toggle (default: off)
+  - Show border toggle (default: on)
+  - Animation selector (None, Hover, Float, Pulse - default: None)
   - Content visibility toggles (title, price, description, button)
   - Button styling (text, colors, font size, font weight, border radius)
 - **Embed Code Generator**: 
@@ -70,10 +74,23 @@ A professional admin interface for creating interactive shoppable videos with cu
 - **Product**: id, title, price, description, url, thumbnailUrl
 - **Video**: id, title, videoUrl, duration, thumbnailUrl, published, carouselConfig, productPlacements
 - **ProductPlacement**: id, productId, startTime, endTime
-- **CarouselConfig**: position, thumbnailShape, thumbnailSize, cornerRadius, visibility flags, button styling (including buttonBorderRadius)
+- **CarouselConfig**: position, thumbnailShape, thumbnailSize, carouselWidth, cornerRadius, transparentBackground, showBorder, animation, visibility flags, button styling (including buttonBorderRadius)
 - **AnalyticsEvent**: id, videoId, productId, eventType (view/product_click), timestamp, metadata
 
 ## Recent Changes
+- Advanced Carousel Customization & UI Improvements (October 21, 2025)
+  - **New Feature**: Carousel width control (32-250px slider, default 250px)
+  - **New Feature**: Transparent background toggle for overlay-style carousels
+  - **New Feature**: Show border toggle to remove/show carousel borders
+  - **New Feature**: Animation selector with 4 options:
+    - None (default)
+    - Hover (scale up on hover)
+    - Float (gentle up/down movement)
+    - Pulse (breathing effect)
+  - **UI Improvement**: Reduced video preview container by 60% for better workspace layout
+  - **Bug Fix**: Fixed embed code to work on external websites with CORS headers
+  - **Enhancement**: Embed code now displays immediately after save with copy button
+  - All new carousel options work in both editor preview and embed player
 - Carousel Styling Bug Fixes & Enhancements (October 21, 2025)
   - **Critical Bug Fix**: Added NaN validation to number inputs (buttonFontSize, buttonBorderRadius, thumbnailSize) to prevent app crashes when inputs are cleared
   - **New Feature**: Thumbnail size slider (32-128px, step 4px, default 64px) with real-time preview
@@ -131,7 +148,11 @@ A professional admin interface for creating interactive shoppable videos with cu
 - Position: Top Right
 - Thumbnail Shape: Square
 - Thumbnail Size: 64px
+- Carousel Width: 250px
 - Corner Radius: 0px
+- Transparent Background: Off
+- Show Border: On
+- Animation: None
 - Show Title: No
 - Show Price: No
 - Show Description: No
