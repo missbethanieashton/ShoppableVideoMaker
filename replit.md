@@ -12,14 +12,24 @@ A professional admin interface for creating interactive shoppable videos with cu
   - File size limits (10MB for images, 100MB for videos)
   - Live preview of uploaded files
   - Error handling with user-friendly messages
-- **Video Editor**: Timeline-based editor for placing products at specific timestamps
+- **Video Editor**: 
+  - Timeline-based editor for placing products at specific timestamps
+  - Drag-and-drop product placements to adjust timing
+  - Resizable placements with left/right edge handles
+  - Real-time preview of carousel overlay on video
+  - Visual timeline with product thumbnails
+  - Minimum 1-second placement duration enforced
 - **Carousel Customization Suite**: 
   - Position selector (9 positions including top-right, top-center, side-right, etc.)
   - Thumbnail shape options (square, circle, portrait)
   - Corner radius control (0-24px)
   - Content visibility toggles (title, price, description, button)
   - Button styling (text, colors, font size, font weight)
-- **Embed Code Generator**: Generates JavaScript embed code for external websites
+- **Embed Code Generator**: 
+  - Generates JavaScript embed code after publishing
+  - Shows embed code in publish dialog
+  - One-click copy to clipboard functionality
+  - Embed code includes video player initialization script
 - **Embeddable Player**: Standalone player with interactive product carousels
 - **Analytics Dashboard**: 
   - Real-time tracking of video views and product clicks
@@ -41,9 +51,10 @@ A professional admin interface for creating interactive shoppable videos with cu
 - **Components**:
   - Sidebar navigation (sleek, minimal design)
   - FileUpload component (reusable drag-and-drop with previews)
-  - Video timeline editor with drag-and-drop
+  - Interactive timeline with draggable/resizable product placements
   - Product carousel overlay preview
   - Carousel customization panel
+  - Publish dialog with embed code display
 
 ### Backend (Express + PostgreSQL)
 - **API Endpoints**:
@@ -62,6 +73,12 @@ A professional admin interface for creating interactive shoppable videos with cu
 - **AnalyticsEvent**: id, videoId, productId, eventType (view/product_click), timestamp, metadata
 
 ## Recent Changes
+- Video Editor Enhancements (October 21, 2025)
+  - Draggable product placements on timeline with smooth cursor tracking
+  - Resizable placements via edge handles (minimum 1 second duration)
+  - Selected placement syncs with sidebar for live timing updates
+  - Publish dialog shows embed code with copy-to-clipboard
+  - Visual feedback for drag/resize operations (cursor changes, selection ring)
 - File Upload System (October 21, 2025)
   - Replaced URL inputs with drag-and-drop file upload
   - FileUpload component with preview and error handling
