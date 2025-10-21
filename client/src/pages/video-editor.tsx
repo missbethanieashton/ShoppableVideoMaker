@@ -60,6 +60,7 @@ export default function VideoEditor() {
       setVideoDuration(video.duration);
       setCarouselConfig({ ...defaultCarouselConfig, ...video.carouselConfig });
       setProductPlacements(video.productPlacements);
+      setSavedVideo(video);
     }
   }, [video, isNew]);
 
@@ -124,7 +125,7 @@ export default function VideoEditor() {
   };
 
   const saveMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (): Promise<Video> => {
       const data: InsertVideo = {
         title: videoTitle,
         videoUrl: videoFile || "",
@@ -136,12 +137,14 @@ export default function VideoEditor() {
       };
 
       if (isNew) {
-        return apiRequest("POST", "/api/videos", data);
+        const response = await apiRequest("POST", "/api/videos", data);
+        return response.json();
       } else {
-        return apiRequest("PATCH", `/api/videos/${params.id}`, data);
+        const response = await apiRequest("PATCH", `/api/videos/${params.id}`, data);
+        return response.json();
       }
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data: Video) => {
       queryClient.invalidateQueries({ queryKey: ["/api/videos"] });
       if (!isNew) {
         queryClient.invalidateQueries({ queryKey: ["/api/videos", params.id] });
@@ -1081,16 +1084,44 @@ function ProductCarouselOverlay({ product, config }: { product: Product; config:
 
   const buttonPos = config.buttonPosition || 'below';
   
+  const getButtonFontStyles = (fontStyle: FontStyle | undefined) => {
+    const baseWeight = config.buttonFontWeight || '400';
+    switch (fontStyle) {
+      case 'bold':
+        return { fontWeight: 'bold', fontStyle: 'normal' };
+      case 'italic':
+        return { fontWeight: baseWeight, fontStyle: 'italic' };
+      case 'bold-italic':
+        return { fontWeight: 'bold', fontStyle: 'italic' };
+      default:
+        return { fontWeight: baseWeight, fontStyle: 'normal' };
+    }
+  };
+
+  const getTitleFontStyles = (fontStyle: FontStyle | undefined) => {
+    switch (fontStyle) {
+      case 'bold':
+        return { fontWeight: 'bold', fontStyle: 'normal' };
+      case 'italic':
+        return { fontWeight: '600', fontStyle: 'italic' };
+      case 'bold-italic':
+        return { fontWeight: 'bold', fontStyle: 'italic' };
+      default:
+        return { fontWeight: '600', fontStyle: 'normal' };
+    }
+  };
+
   const renderButton = () => {
     if (!config.showButton) return null;
+    const buttonFontStyles = getButtonFontStyles(config.buttonFontStyle);
     return (
       <button
         style={{
           backgroundColor: config.buttonBackgroundColor,
           color: config.buttonTextColor,
           fontSize: `${config.buttonFontSize}px`,
-          fontWeight: config.buttonFontWeight,
-          fontStyle: config.buttonFontStyle || 'normal',
+          fontWeight: buttonFontStyles.fontWeight,
+          fontStyle: buttonFontStyles.fontStyle,
           borderRadius: `${config.buttonBorderRadius}px`,
         }}
         className="px-3 py-1"
@@ -1111,7 +1142,7 @@ function ProductCarouselOverlay({ product, config }: { product: Product; config:
         />
         <div className="flex-1 min-w-0 space-y-1">
           {config.showTitle && (
-            <p className="text-sm font-semibold line-clamp-2" style={{ fontStyle: config.titleFontStyle || 'normal' }}>{product.title}</p>
+            <p className="text-sm line-clamp-2" style={getTitleFontStyles(config.titleFontStyle)}>{product.title}</p>
           )}
           {config.showPrice && (
             <p className="text-sm font-semibold text-primary">{product.price}</p>

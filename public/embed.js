@@ -213,8 +213,23 @@
         const title = document.createElement('p');
         title.textContent = product.title;
         title.style.fontSize = '14px';
-        title.style.fontWeight = '600';
-        title.style.fontStyle = config.titleFontStyle || 'normal';
+        
+        // Apply font styles
+        const titleFontStyle = config.titleFontStyle || 'normal';
+        if (titleFontStyle === 'bold') {
+          title.style.fontWeight = 'bold';
+          title.style.fontStyle = 'normal';
+        } else if (titleFontStyle === 'italic') {
+          title.style.fontWeight = '600';
+          title.style.fontStyle = 'italic';
+        } else if (titleFontStyle === 'bold-italic') {
+          title.style.fontWeight = 'bold';
+          title.style.fontStyle = 'italic';
+        } else {
+          title.style.fontWeight = '600';
+          title.style.fontStyle = 'normal';
+        }
+        
         title.style.margin = '0';
         title.style.lineHeight = '1.4';
         title.style.color = '#000';
@@ -254,8 +269,23 @@
         button.style.backgroundColor = config.buttonBackgroundColor;
         button.style.color = config.buttonTextColor;
         button.style.fontSize = `${config.buttonFontSize}px`;
-        button.style.fontWeight = config.buttonFontWeight;
-        button.style.fontStyle = config.buttonFontStyle || 'normal';
+        
+        // Apply font styles
+        const buttonFontStyle = config.buttonFontStyle || 'normal';
+        if (buttonFontStyle === 'bold') {
+          button.style.fontWeight = 'bold';
+          button.style.fontStyle = 'normal';
+        } else if (buttonFontStyle === 'italic') {
+          button.style.fontWeight = config.buttonFontWeight || '400';
+          button.style.fontStyle = 'italic';
+        } else if (buttonFontStyle === 'bold-italic') {
+          button.style.fontWeight = 'bold';
+          button.style.fontStyle = 'italic';
+        } else {
+          button.style.fontWeight = config.buttonFontWeight || '400';
+          button.style.fontStyle = 'normal';
+        }
+        
         button.style.borderRadius = `${config.buttonBorderRadius}px`;
         button.style.textDecoration = 'none';
         button.style.cursor = 'pointer';

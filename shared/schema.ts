@@ -36,7 +36,7 @@ export const carouselPositions = [
 export const thumbnailShapes = ["square", "circle", "portrait"] as const;
 export const carouselAnimations = ["none", "hover", "float", "pulse"] as const;
 export const buttonPositions = ["below", "right", "left", "top"] as const;
-export const fontStyles = ["normal", "italic"] as const;
+export const fontStyles = ["normal", "italic", "bold", "bold-italic"] as const;
 
 export type CarouselPosition = typeof carouselPositions[number];
 export type ThumbnailShape = typeof thumbnailShapes[number];
