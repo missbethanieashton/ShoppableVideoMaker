@@ -16,8 +16,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { FileUpload } from "@/components/ui/file-upload";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { Video, Product, InsertVideo, ProductPlacement, CarouselConfig, CarouselPosition, ThumbnailShape, CarouselAnimation } from "@shared/schema";
-import { defaultCarouselConfig, carouselPositions, thumbnailShapes, carouselAnimations } from "@shared/schema";
+import type { Video, Product, InsertVideo, ProductPlacement, CarouselConfig, CarouselPosition, ThumbnailShape, CarouselAnimation, ButtonPosition, FontStyle } from "@shared/schema";
+import { defaultCarouselConfig, carouselPositions, thumbnailShapes, carouselAnimations, buttonPositions, fontStyles } from "@shared/schema";
 
 export default function VideoEditor() {
   const params = useParams();
@@ -556,7 +556,7 @@ export default function VideoEditor() {
                     <Slider
                       value={[carouselConfig.thumbnailSize]}
                       min={32}
-                      max={128}
+                      max={250}
                       step={4}
                       onValueChange={([value]) =>
                         setCarouselConfig({ ...carouselConfig, thumbnailSize: value })
@@ -661,6 +661,28 @@ export default function VideoEditor() {
                           data-testid="switch-show-title"
                         />
                       </div>
+                      {carouselConfig.showTitle && (
+                        <div>
+                          <Label>Title Font Style</Label>
+                          <Select
+                            value={carouselConfig.titleFontStyle}
+                            onValueChange={(value: FontStyle) =>
+                              setCarouselConfig({ ...carouselConfig, titleFontStyle: value })
+                            }
+                          >
+                            <SelectTrigger data-testid="select-title-font-style">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {fontStyles.map((style) => (
+                                <SelectItem key={style} value={style}>
+                                  {style.charAt(0).toUpperCase() + style.slice(1)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
                       <div className="flex items-center justify-between">
                         <Label htmlFor="show-price">Show Price</Label>
                         <Switch
@@ -763,6 +785,46 @@ export default function VideoEditor() {
                               <SelectItem value="500">Medium</SelectItem>
                               <SelectItem value="600">Semibold</SelectItem>
                               <SelectItem value="700">Bold</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label>Font Style</Label>
+                          <Select
+                            value={carouselConfig.buttonFontStyle}
+                            onValueChange={(value: FontStyle) =>
+                              setCarouselConfig({ ...carouselConfig, buttonFontStyle: value })
+                            }
+                          >
+                            <SelectTrigger data-testid="select-button-font-style">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {fontStyles.map((style) => (
+                                <SelectItem key={style} value={style}>
+                                  {style.charAt(0).toUpperCase() + style.slice(1)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label>Button Position</Label>
+                          <Select
+                            value={carouselConfig.buttonPosition}
+                            onValueChange={(value: ButtonPosition) =>
+                              setCarouselConfig({ ...carouselConfig, buttonPosition: value })
+                            }
+                          >
+                            <SelectTrigger data-testid="select-button-position">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {buttonPositions.map((pos) => (
+                                <SelectItem key={pos} value={pos}>
+                                  {pos.charAt(0).toUpperCase() + pos.slice(1)}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>

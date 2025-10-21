@@ -35,15 +35,19 @@ export const carouselPositions = [
 
 export const thumbnailShapes = ["square", "circle", "portrait"] as const;
 export const carouselAnimations = ["none", "hover", "float", "pulse"] as const;
+export const buttonPositions = ["below", "right", "left", "top"] as const;
+export const fontStyles = ["normal", "italic"] as const;
 
 export type CarouselPosition = typeof carouselPositions[number];
 export type ThumbnailShape = typeof thumbnailShapes[number];
 export type CarouselAnimation = typeof carouselAnimations[number];
+export type ButtonPosition = typeof buttonPositions[number];
+export type FontStyle = typeof fontStyles[number];
 
 export interface CarouselConfig {
   position: CarouselPosition;
   thumbnailShape: ThumbnailShape;
-  thumbnailSize: number; // Size in pixels (width/height for square/circle, width for portrait)
+  thumbnailSize: number; // Size in pixels (32-250px for width/height)
   carouselWidth: number; // Width of entire carousel in pixels (32-250px)
   cornerRadius: number;
   transparentBackground: boolean;
@@ -58,7 +62,10 @@ export interface CarouselConfig {
   buttonTextColor: string;
   buttonFontSize: number;
   buttonFontWeight: string;
+  buttonFontStyle: FontStyle;
   buttonBorderRadius: number;
+  buttonPosition: ButtonPosition;
+  titleFontStyle: FontStyle;
 }
 
 // Product placement schema (products on timeline)
@@ -107,7 +114,10 @@ export const defaultCarouselConfig: CarouselConfig = {
   buttonTextColor: "#FFFFFF",
   buttonFontSize: 14,
   buttonFontWeight: "500",
+  buttonFontStyle: "normal",
   buttonBorderRadius: 4,
+  buttonPosition: "below",
+  titleFontStyle: "normal",
 };
 
 // Analytics events schema
