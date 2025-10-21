@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useParams, useLocation } from "wouter";
-import { Save, Code, Upload, ArrowLeft, Play, Pause, Plus, X } from "lucide-react";
+import { Save, Code, Upload, ArrowLeft, Play, Pause, Plus, X, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,6 +39,7 @@ export default function VideoEditor() {
   const [draggingPlacement, setDraggingPlacement] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState<number>(0);
   const [resizingPlacement, setResizingPlacement] = useState<{ id: string; edge: 'left' | 'right' } | null>(null);
+  const [savedVideo, setSavedVideo] = useState<Video | null>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
 
   const isNew = params.id === "new";
@@ -67,7 +68,7 @@ export default function VideoEditor() {
     const video = document.createElement("video");
     video.src = url;
     video.onloadedmetadata = () => {
-      setVideoDuration(video.duration);
+      setVideoDuration(Math.round(video.duration));
     };
   };
 
@@ -127,7 +128,7 @@ export default function VideoEditor() {
       const data: InsertVideo = {
         title: videoTitle,
         videoUrl: videoFile || "",
-        duration: videoDuration,
+        duration: Math.round(videoDuration),
         thumbnailUrl: "",
         published: false,
         carouselConfig,
@@ -145,6 +146,7 @@ export default function VideoEditor() {
       if (!isNew) {
         queryClient.invalidateQueries({ queryKey: ["/api/videos", params.id] });
       }
+      setSavedVideo(data);
       toast({
         title: "Video saved",
         description: "Your video has been saved successfully.",
@@ -323,6 +325,35 @@ export default function VideoEditor() {
           )}
         </div>
       </div>
+
+      {savedVideo && (
+        <div className="px-4 py-3 bg-muted/50 border-b">
+          <div className="flex items-start gap-3">
+            <div className="flex-1">
+              <Label className="text-xs font-medium text-muted-foreground">Embed Code</Label>
+              <div className="mt-1 p-3 bg-background border rounded-md font-mono text-xs overflow-x-auto">
+                {generateEmbedCode(savedVideo)}
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => {
+                const embedCode = generateEmbedCode(savedVideo);
+                navigator.clipboard.writeText(embedCode);
+                toast({
+                  title: "Copied to clipboard",
+                  description: "Embed code has been copied successfully.",
+                });
+              }}
+              data-testid="button-copy-embed"
+              className="mt-5"
+            >
+              <Copy className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       <div className="flex-1 flex overflow-hidden">
         <div className="flex-1 flex flex-col overflow-hidden">
