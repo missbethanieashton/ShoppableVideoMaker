@@ -1244,13 +1244,13 @@ function ProductCarouselOverlay({
   const getAnimationClass = () => {
     switch (config.animation) {
       case "hover":
-        return "hover:scale-105 transition-transform";
+        return "carousel-hover-animate";
       case "float":
-        return "animate-bounce";
+        return "carousel-float-animate";
       case "pulse":
-        return "animate-pulse";
+        return "carousel-pulse-animate";
       default:
-        return "";
+        return "carousel-fade-in";
     }
   };
 

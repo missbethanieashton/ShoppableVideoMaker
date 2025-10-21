@@ -35,16 +35,25 @@
         50% { transform: scale(1.05); }
       }
       
+      @keyframes fade-in {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+      }
+      
+      .shoppable-carousel {
+        animation: fade-in 0.3s ease-out;
+      }
+      
       .shoppable-carousel.animation-hover {
-        animation: slow-drift 6s ease-in-out infinite;
+        animation: fade-in 0.3s ease-out, slow-drift 6s ease-in-out infinite;
       }
       
       .shoppable-carousel.animation-float {
-        animation: gentle-float 3s ease-in-out infinite;
+        animation: fade-in 0.3s ease-out, gentle-float 3s ease-in-out infinite;
       }
       
       .shoppable-carousel.animation-pulse {
-        animation: soft-pulse 2s ease-in-out infinite;
+        animation: fade-in 0.3s ease-out, soft-pulse 2s ease-in-out infinite;
       }
     `;
     document.head.appendChild(style);
