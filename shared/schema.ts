@@ -97,3 +97,20 @@ export const defaultCarouselConfig: CarouselConfig = {
   buttonFontWeight: "500",
   buttonBorderRadius: 4,
 };
+
+// Analytics events schema
+export const analyticsEvents = pgTable("analytics_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  videoId: varchar("video_id").notNull().references(() => videos.id, { onDelete: "cascade" }),
+  productId: varchar("product_id").references(() => products.id, { onDelete: "set null" }),
+  eventType: varchar("event_type", { length: 50 }).notNull(), // 'view', 'product_click', 'product_ctr'
+  timestamp: integer("timestamp").notNull(), // Unix timestamp
+  metadata: jsonb("metadata"), // Additional event data
+});
+
+export const insertAnalyticsEventSchema = createInsertSchema(analyticsEvents).omit({
+  id: true,
+});
+
+export type InsertAnalyticsEvent = z.infer<typeof insertAnalyticsEventSchema>;
+export type AnalyticsEvent = typeof analyticsEvents.$inferSelect;

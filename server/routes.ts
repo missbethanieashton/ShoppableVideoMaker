@@ -28,6 +28,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const products = await storage.getProducts();
       res.json(products);
     } catch (error) {
+      console.error("Error fetching products:", error);
       res.status(500).json({ error: "Failed to fetch products" });
     }
   });
@@ -53,6 +54,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: error.errors });
       }
+      console.error("Error creating product:", error);
       res.status(500).json({ error: "Failed to create product" });
     }
   });
@@ -71,6 +73,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const videos = await storage.getVideos();
       res.json(videos);
     } catch (error) {
+      console.error("Error fetching videos:", error);
       res.status(500).json({ error: "Failed to fetch videos" });
     }
   });
