@@ -1,4 +1,4 @@
-import { Video, Package, Settings } from "lucide-react";
+import { Video, Package, BarChart3, Settings } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -20,6 +20,11 @@ const menuItems = [
     title: "Product Inventory",
     url: "/products",
     icon: Package,
+  },
+  {
+    title: "Analytics",
+    url: "/analytics",
+    icon: BarChart3,
   },
   {
     title: "Settings",

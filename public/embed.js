@@ -1,7 +1,16 @@
 (function() {
   window.ShoppableVideo = {
+    apiUrl: null,
+    videoId: null,
+    viewTracked: false,
+    productCache: new Map(),
+
     init: function(options) {
       const { containerId, videoId, apiUrl } = options;
+      this.apiUrl = apiUrl;
+      this.videoId = videoId;
+      this.viewTracked = false;
+      this.productCache = new Map();
       const container = document.getElementById(containerId);
       
       if (!container) {
@@ -17,6 +26,23 @@
         .catch(err => {
           console.error('Shoppable Video: Failed to load video', err);
         });
+    },
+
+    trackAnalytics: function(eventType, productId = null) {
+      if (!this.apiUrl || !this.videoId) return;
+      
+      fetch(`${this.apiUrl}/analytics/events`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          videoId: this.videoId,
+          productId: productId,
+          eventType: eventType,
+          timestamp: Math.floor(Date.now() / 1000)
+        })
+      }).catch(err => {
+        console.error('Analytics tracking failed:', err);
+      });
     },
 
     renderPlayer: function(container, video) {
@@ -44,6 +70,13 @@
       wrapper.appendChild(carouselContainer);
       container.appendChild(wrapper);
 
+      videoElement.addEventListener('play', () => {
+        if (!this.viewTracked) {
+          this.trackAnalytics('view');
+          this.viewTracked = true;
+        }
+      });
+
       videoElement.addEventListener('timeupdate', () => {
         this.updateCarousel(carouselContainer, video, videoElement.currentTime);
       });
@@ -57,12 +90,19 @@
       );
 
       activePlacements.forEach(placement => {
-        fetch(`${window.location.origin}/api/products/${placement.productId}`)
-          .then(res => res.json())
-          .then(product => {
-            const carousel = this.createCarousel(product, video.carouselConfig);
-            container.appendChild(carousel);
-          });
+        if (this.productCache.has(placement.productId)) {
+          const product = this.productCache.get(placement.productId);
+          const carousel = this.createCarousel(product, video.carouselConfig);
+          container.appendChild(carousel);
+        } else {
+          fetch(`${this.apiUrl}/products/${placement.productId}`)
+            .then(res => res.json())
+            .then(product => {
+              this.productCache.set(placement.productId, product);
+              const carousel = this.createCarousel(product, video.carouselConfig);
+              container.appendChild(carousel);
+            });
+        }
       });
     },
 
@@ -157,10 +197,24 @@
       carousel.appendChild(content);
 
       carousel.style.cursor = config.showButton ? 'default' : 'pointer';
+      
+      const trackAndOpen = (productId, url) => {
+        this.trackAnalytics('product_click', productId);
+        window.open(url, '_blank');
+      };
+
       if (!config.showButton) {
         carousel.addEventListener('click', () => {
-          window.open(product.url, '_blank');
+          trackAndOpen(product.id, product.url);
         });
+      } else {
+        const button = info.querySelector('a');
+        if (button) {
+          button.addEventListener('click', (e) => {
+            e.preventDefault();
+            trackAndOpen(product.id, product.url);
+          });
+        }
       }
 
       return carousel;

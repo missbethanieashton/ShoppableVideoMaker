@@ -4,7 +4,7 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 import { storage } from "./storage";
-import { insertProductSchema, insertVideoSchema } from "@shared/schema";
+import { insertProductSchema, insertVideoSchema, insertAnalyticsEventSchema } from "@shared/schema";
 import { z } from "zod";
 
 const upload = multer({
@@ -144,6 +144,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ videoUrl });
     } catch (error) {
       res.status(500).json({ error: "Failed to upload video" });
+    }
+  });
+
+  app.post("/api/analytics/events", async (req, res) => {
+    try {
+      const data = insertAnalyticsEventSchema.parse(req.body);
+      const event = await storage.createAnalyticsEvent(data);
+      res.status(201).json(event);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      if ((error as any)?.code === '23503') {
+        return res.status(400).json({ error: "Invalid videoId or productId reference" });
+      }
+      console.error("Error creating analytics event:", error);
+      res.status(500).json({ error: "Failed to create analytics event" });
+    }
+  });
+
+  app.get("/api/analytics/events", async (req, res) => {
+    try {
+      const videoId = req.query.videoId as string | undefined;
+      const startTime = req.query.startTime ? parseInt(req.query.startTime as string) : undefined;
+      const endTime = req.query.endTime ? parseInt(req.query.endTime as string) : undefined;
+      
+      const events = await storage.getAnalyticsEvents(videoId, startTime, endTime);
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching analytics events:", error);
+      res.status(500).json({ error: "Failed to fetch analytics events" });
+    }
+  });
+
+  app.get("/api/analytics/summary", async (req, res) => {
+    try {
+      const videoId = req.query.videoId as string | undefined;
+      const summary = await storage.getAnalyticsSummary(videoId);
+      res.json(summary);
+    } catch (error) {
+      console.error("Error fetching analytics summary:", error);
+      res.status(500).json({ error: "Failed to fetch analytics summary" });
     }
   });
 

@@ -15,6 +15,12 @@ A professional admin interface for creating interactive shoppable videos with cu
   - Button styling (text, colors, font size, font weight)
 - **Embed Code Generator**: Generates JavaScript embed code for external websites
 - **Embeddable Player**: Standalone player with interactive product carousels
+- **Analytics Dashboard**: 
+  - Real-time tracking of video views and product clicks
+  - Click-through rate (CTR) calculation
+  - Top performing products analysis
+  - Filter analytics by individual video or all videos
+  - Automatic event tracking in embed player
 
 ## Architecture
 
@@ -23,6 +29,7 @@ A professional admin interface for creating interactive shoppable videos with cu
   - `/` - Video Library (dashboard)
   - `/products` - Product Inventory
   - `/editor/:id` - Video Editor
+  - `/analytics` - Analytics Dashboard
   - `/settings` - Application settings
   
 - **Components**:
@@ -31,26 +38,38 @@ A professional admin interface for creating interactive shoppable videos with cu
   - Product carousel overlay preview
   - Carousel customization panel
 
-### Backend (Express + In-Memory Storage)
+### Backend (Express + PostgreSQL)
 - **API Endpoints**:
   - Products: GET/POST/DELETE `/api/products`
   - Videos: GET/POST/PATCH/DELETE `/api/videos`
   - Video publishing: PATCH `/api/videos/:id/publish`
   - File upload: POST `/api/upload/video`
+  - Analytics events: POST `/api/analytics/events`
+  - Analytics retrieval: GET `/api/analytics/events`, GET `/api/analytics/summary`
 
 ### Data Models
 - **Product**: id, title, price, description, url, thumbnailUrl
 - **Video**: id, title, videoUrl, duration, thumbnailUrl, published, carouselConfig, productPlacements
 - **ProductPlacement**: id, productId, startTime, endTime
 - **CarouselConfig**: position, thumbnailShape, cornerRadius, visibility flags, button styling
+- **AnalyticsEvent**: id, videoId, productId, eventType (view/product_click), timestamp, metadata
 
 ## Recent Changes
-- Initial implementation (October 21, 2025)
-- Created complete schema-first architecture
-- Implemented all frontend components with professional design
-- Built timeline-based video editor
-- Created carousel customization suite
-- Implemented embed code generation system
+- Database migration from in-memory to PostgreSQL (October 21, 2025)
+  - Neon serverless PostgreSQL with Drizzle ORM
+  - Tables: products, videos, analytics_events
+  - Persistent storage with auto-generated UUIDs
+- Analytics Dashboard implementation (October 21, 2025)
+  - Real-time event tracking in embed player
+  - Video views and product click tracking
+  - CTR calculation and top products analysis
+  - Filter by individual video or all videos
+- Initial MVP implementation (October 21, 2025)
+  - Complete schema-first architecture
+  - All frontend components with professional design
+  - Timeline-based video editor
+  - Carousel customization suite
+  - Embed code generation system
 
 ## User Preferences
 - No authentication required (single-user admin interface)
@@ -65,7 +84,8 @@ A professional admin interface for creating interactive shoppable videos with cu
 - Shadcn UI components
 - Tailwind CSS for styling
 - Express.js backend
-- In-memory storage (MemStorage)
+- PostgreSQL database (Neon serverless)
+- Drizzle ORM for type-safe database operations
 - Multer for file uploads
 
 ## Default Carousel Configuration

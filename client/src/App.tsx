@@ -8,6 +8,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import VideoLibrary from "@/pages/video-library";
 import ProductInventory from "@/pages/product-inventory";
 import VideoEditor from "@/pages/video-editor";
+import Analytics from "@/pages/analytics";
 import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 
@@ -17,6 +18,7 @@ function Router() {
       <Route path="/" component={VideoLibrary} />
       <Route path="/products" component={ProductInventory} />
       <Route path="/editor/:id" component={VideoEditor} />
+      <Route path="/analytics" component={Analytics} />
       <Route path="/settings" component={Settings} />
       <Route component={NotFound} />
     </Switch>

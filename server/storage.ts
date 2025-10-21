@@ -1,6 +1,16 @@
-import { type Product, type InsertProduct, type Video, type InsertVideo, products, videos } from "@shared/schema";
+import { 
+  type Product, 
+  type InsertProduct, 
+  type Video, 
+  type InsertVideo, 
+  type AnalyticsEvent,
+  type InsertAnalyticsEvent,
+  products, 
+  videos,
+  analyticsEvents
+} from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
 
 export interface IStorage {
   getProducts(): Promise<Product[]>;
@@ -14,6 +24,15 @@ export interface IStorage {
   updateVideo(id: string, video: Partial<InsertVideo>): Promise<Video>;
   publishVideo(id: string): Promise<Video>;
   deleteVideo(id: string): Promise<void>;
+
+  createAnalyticsEvent(event: InsertAnalyticsEvent): Promise<AnalyticsEvent>;
+  getAnalyticsEvents(videoId?: string, startTime?: number, endTime?: number): Promise<AnalyticsEvent[]>;
+  getAnalyticsSummary(videoId?: string): Promise<{
+    totalViews: number;
+    totalClicks: number;
+    clickThroughRate: number;
+    topProducts: Array<{ productId: string; clicks: number; productTitle?: string }>;
+  }>;
 }
 
 export class DbStorage implements IStorage {
@@ -77,6 +96,98 @@ export class DbStorage implements IStorage {
 
   async deleteVideo(id: string): Promise<void> {
     await db.delete(videos).where(eq(videos.id, id));
+  }
+
+  async createAnalyticsEvent(event: InsertAnalyticsEvent): Promise<AnalyticsEvent> {
+    const result = await db.insert(analyticsEvents).values(event).returning();
+    return result[0];
+  }
+
+  async getAnalyticsEvents(videoId?: string, startTime?: number, endTime?: number): Promise<AnalyticsEvent[]> {
+    let query = db.select().from(analyticsEvents);
+    
+    const conditions = [];
+    if (videoId) {
+      conditions.push(eq(analyticsEvents.videoId, videoId));
+    }
+    if (startTime) {
+      conditions.push(gte(analyticsEvents.timestamp, startTime));
+    }
+    if (endTime) {
+      conditions.push(lte(analyticsEvents.timestamp, endTime));
+    }
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions)) as any;
+    }
+    
+    return await query.orderBy(desc(analyticsEvents.timestamp));
+  }
+
+  async getAnalyticsSummary(videoId?: string): Promise<{
+    totalViews: number;
+    totalClicks: number;
+    clickThroughRate: number;
+    topProducts: Array<{ productId: string; clicks: number; productTitle?: string }>;
+  }> {
+    const viewConditions = videoId 
+      ? and(eq(analyticsEvents.videoId, videoId), eq(analyticsEvents.eventType, 'view'))
+      : eq(analyticsEvents.eventType, 'view');
+    
+    const clickConditions = videoId
+      ? and(eq(analyticsEvents.videoId, videoId), eq(analyticsEvents.eventType, 'product_click'))
+      : eq(analyticsEvents.eventType, 'product_click');
+
+    const viewResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(analyticsEvents)
+      .where(viewConditions);
+    
+    const clickResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(analyticsEvents)
+      .where(clickConditions);
+
+    const totalViews = Number(viewResult[0]?.count || 0);
+    const totalClicks = Number(clickResult[0]?.count || 0);
+    const clickThroughRate = totalViews > 0 ? (totalClicks / totalViews) * 100 : 0;
+
+    const topProductsConditions = videoId
+      ? and(
+          eq(analyticsEvents.videoId, videoId),
+          eq(analyticsEvents.eventType, 'product_click'),
+          sql`${analyticsEvents.productId} IS NOT NULL`
+        )
+      : and(
+          eq(analyticsEvents.eventType, 'product_click'),
+          sql`${analyticsEvents.productId} IS NOT NULL`
+        );
+
+    const topProductsResult = await db
+      .select({
+        productId: analyticsEvents.productId,
+        clicks: sql<number>`count(*)`,
+        productTitle: products.title,
+      })
+      .from(analyticsEvents)
+      .leftJoin(products, eq(analyticsEvents.productId, products.id))
+      .where(topProductsConditions)
+      .groupBy(analyticsEvents.productId, products.title)
+      .orderBy(desc(sql`count(*)`))
+      .limit(10);
+
+    const topProducts = topProductsResult.map(row => ({
+      productId: row.productId!,
+      clicks: Number(row.clicks),
+      productTitle: row.productTitle || undefined,
+    }));
+
+    return {
+      totalViews,
+      totalClicks,
+      clickThroughRate,
+      topProducts,
+    };
   }
 }
 
