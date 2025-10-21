@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FileUpload } from "@/components/ui/file-upload";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { Video, Product, InsertVideo, ProductPlacement, CarouselConfig, CarouselPosition, ThumbnailShape } from "@shared/schema";
@@ -25,7 +26,6 @@ export default function VideoEditor() {
 
   const [videoTitle, setVideoTitle] = useState("");
   const [videoFile, setVideoFile] = useState<string | null>(null);
-  const [videoFileObject, setVideoFileObject] = useState<File | null>(null);
   const [videoDuration, setVideoDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -34,7 +34,6 @@ export default function VideoEditor() {
   const [selectedPlacement, setSelectedPlacement] = useState<ProductPlacement | null>(null);
   const [addProductDialogOpen, setAddProductDialogOpen] = useState(false);
   const [publishDialogOpen, setPublishDialogOpen] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
 
   const isNew = params.id === "new";
 
@@ -57,18 +56,13 @@ export default function VideoEditor() {
     }
   }, [video, isNew]);
 
-  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setVideoFileObject(file);
-      const url = URL.createObjectURL(file);
-      setVideoFile(url);
-      const video = document.createElement("video");
-      video.src = url;
-      video.onloadedmetadata = () => {
-        setVideoDuration(video.duration);
-      };
-    }
+  const handleVideoUpload = (url: string) => {
+    setVideoFile(url);
+    const video = document.createElement("video");
+    video.src = url;
+    video.onloadedmetadata = () => {
+      setVideoDuration(video.duration);
+    };
   };
 
   const togglePlayPause = () => {
@@ -121,35 +115,9 @@ export default function VideoEditor() {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      let finalVideoUrl = videoFile || "";
-
-      if (videoFileObject) {
-        setIsUploading(true);
-        try {
-          const formData = new FormData();
-          formData.append("video", videoFileObject);
-
-          const uploadResponse = await fetch("/api/upload/video", {
-            method: "POST",
-            body: formData,
-          });
-
-          if (!uploadResponse.ok) {
-            throw new Error("Failed to upload video");
-          }
-
-          const { videoUrl } = await uploadResponse.json();
-          finalVideoUrl = videoUrl;
-        } catch (error) {
-          setIsUploading(false);
-          throw error;
-        }
-        setIsUploading(false);
-      }
-
       const data: InsertVideo = {
         title: videoTitle,
-        videoUrl: finalVideoUrl,
+        videoUrl: videoFile || "",
         duration: videoDuration,
         thumbnailUrl: "",
         published: false,
@@ -174,7 +142,6 @@ export default function VideoEditor() {
       }
     },
     onError: (error) => {
-      setIsUploading(false);
       toast({
         title: "Save failed",
         description: error instanceof Error ? error.message : "Failed to save video",
@@ -229,11 +196,11 @@ export default function VideoEditor() {
           <Button 
             variant="outline" 
             onClick={() => saveMutation.mutate()} 
-            disabled={!videoFile || !videoTitle || saveMutation.isPending || isUploading} 
+            disabled={!videoFile || !videoTitle || saveMutation.isPending} 
             data-testid="button-save"
           >
             <Save className="w-4 h-4 mr-2" />
-            {isUploading ? "Uploading..." : saveMutation.isPending ? "Saving..." : "Save"}
+            {saveMutation.isPending ? "Saving..." : "Save"}
           </Button>
           {!isNew && (
             <Button 
@@ -253,21 +220,19 @@ export default function VideoEditor() {
           <div className="flex-1 bg-muted/30 flex items-center justify-center p-6 overflow-auto">
             {!videoFile ? (
               <Card className="w-full max-w-md">
-                <CardContent className="p-12 text-center space-y-4">
-                  <Upload className="w-12 h-12 mx-auto text-muted-foreground" />
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">Upload Video</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
+                <CardContent className="p-12 space-y-4">
+                  <div className="text-center space-y-2 mb-6">
+                    <Upload className="w-12 h-12 mx-auto text-muted-foreground" />
+                    <h3 className="text-lg font-semibold">Upload Video</h3>
+                    <p className="text-sm text-muted-foreground">
                       Choose a video file to start creating your shoppable video
                     </p>
-                    <Input
-                      type="file"
-                      accept="video/*"
-                      onChange={handleVideoUpload}
-                      className="cursor-pointer"
-                      data-testid="input-video-upload"
-                    />
                   </div>
+                  <FileUpload
+                    type="video"
+                    value={videoFile || ""}
+                    onChange={handleVideoUpload}
+                  />
                 </CardContent>
               </Card>
             ) : (

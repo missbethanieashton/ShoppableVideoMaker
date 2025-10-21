@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { FileUpload } from "@/components/ui/file-upload";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -171,12 +172,12 @@ export default function ProductInventory() {
                   name="thumbnailUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Thumbnail URL</FormLabel>
+                      <FormLabel>Product Thumbnail</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="https://example.com/image.jpg"
-                          data-testid="input-product-thumbnail"
-                          {...field}
+                        <FileUpload
+                          type="image"
+                          value={field.value}
+                          onChange={field.onChange}
                         />
                       </FormControl>
                       <FormMessage />

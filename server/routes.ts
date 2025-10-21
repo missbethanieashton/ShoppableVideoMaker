@@ -147,6 +147,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/upload/image", upload.single("image"), (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+      const imageUrl = `/uploads/${req.file.filename}`;
+      res.json({ imageUrl });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to upload image" });
+    }
+  });
+
   app.post("/api/analytics/events", async (req, res) => {
     try {
       const data = insertAnalyticsEventSchema.parse(req.body);
