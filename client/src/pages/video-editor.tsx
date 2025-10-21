@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useParams, useLocation } from "wouter";
-import { Save, Code, Upload, ArrowLeft, Play, Pause, Plus, X, Copy } from "lucide-react";
+import { Save, Code, Upload, ArrowLeft, Play, Pause, Plus, X, Copy, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -379,7 +379,7 @@ export default function VideoEditor() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="relative max-w-sm w-full">
+              <div className="relative max-w-[19rem] w-full">
                 <video
                   ref={videoRef}
                   src={videoFile}
@@ -943,6 +943,17 @@ export default function VideoEditor() {
                                     {formatTime(placement.startTime)} - {formatTime(placement.endTime)}
                                   </p>
                                 </div>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    removePlacement(placement.id);
+                                  }}
+                                  data-testid={`button-delete-placement-${placement.id}`}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
                               </>
                             )}
                           </CardContent>
