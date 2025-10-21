@@ -1142,31 +1142,32 @@ export default function VideoEditor() {
                         >
                           <CardContent className="p-3 flex items-center gap-3">
                             {product && (
-                              <>
+                              <div className="flex items-center gap-3 flex-1 min-w-0">
                                 <img
                                   src={product.thumbnailUrl}
                                   alt={product.title}
-                                  className="w-10 h-10 object-cover rounded"
+                                  className="w-12 h-12 rounded object-cover flex-shrink-0"
                                 />
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium line-clamp-1">{product.title}</p>
+                                  <h4 className="font-medium text-sm truncate">{product.title}</h4>
                                   <p className="text-xs text-muted-foreground">
-                                    {formatTime(placement.startTime)} - {formatTime(placement.endTime)}
+                                    {placement.startTime.toFixed(1)}s - {placement.endTime.toFixed(1)}s
                                   </p>
                                 </div>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    removePlacement(placement.id);
-                                  }}
-                                  data-testid={`button-delete-placement-${placement.id}`}
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </>
+                              </div>
                             )}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removePlacement(placement.id);
+                              }}
+                              data-testid={`button-delete-placement-${placement.id}`}
+                              className="flex-shrink-0"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </CardContent>
                         </Card>
                       );
@@ -1178,83 +1179,31 @@ export default function VideoEditor() {
           </Tabs>
         </div>
       </div>
-
-      <Dialog open={addProductDialogOpen} onOpenChange={setAddProductDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add Product</DialogTitle>
-            <DialogDescription>
-              Select a product to add to the timeline at {formatTime(currentTime)}
-            </DialogDescription>
-          </DialogHeader>
-          <ScrollArea className="max-h-96">
-            <div className="space-y-2">
-              {products?.map((product) => (
-                <Card
-                  key={product.id}
-                  className="cursor-pointer hover-elevate"
-                  onClick={() => addProductPlacement(product.id)}
-                >
-                  <CardContent className="p-3 flex items-center gap-3">
-                    <img
-                      src={product.thumbnailUrl}
-                      alt={product.title}
-                      className="w-12 h-12 object-cover rounded"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium line-clamp-1">{product.title}</p>
-                      <p className="text-xs text-muted-foreground">{product.price}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </ScrollArea>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={publishDialogOpen} onOpenChange={setPublishDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Video Published!</DialogTitle>
-            <DialogDescription>
-              Your video has been published. Copy the embed code below to add it to your website.
-            </DialogDescription>
-          </DialogHeader>
-          {publishedVideo && (
-            <div className="space-y-4">
-              <Textarea
-                readOnly
-                value={generateEmbedCode(publishedVideo)}
-                className="font-mono text-xs h-48"
-                data-testid="textarea-embed-code"
-              />
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleCopyEmbed}
-                  className="flex-1"
-                  data-testid="button-copy-embed"
-                >
-                  <Code className="w-4 h-4 mr-2" />
-                  Copy Embed Code
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={() => navigate("/")} 
-                  data-testid="button-go-to-library"
-                >
-                  Go to Library
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
 
-function ProductCarouselOverlay({ product, config }: { product: Product; config: CarouselConfig }) {
+// Product Carousel Overlay Component
+function ProductCarouselOverlay({
+  product,
+  config,
+}: {
+  product: Product;
+  config: CarouselConfig;
+}) {
+  const getFontFamily = (fontFamily: FontFamily): string => {
+    switch (fontFamily) {
+      case 'league-spartan':
+        return 'League Spartan, sans-serif';
+      case 'glacial-indifference':
+        return 'Glacial Indifference, sans-serif';
+      case 'lacquer':
+        return 'Lacquer, cursive';
+      default:
+        return 'inherit';
+    }
+  };
+
   const getPositionClasses = () => {
     switch (config.position) {
       case "top-right":
@@ -1273,116 +1222,105 @@ function ProductCarouselOverlay({ product, config }: { product: Product; config:
         return "bottom-4 left-1/2 -translate-x-1/2";
       case "bottom-left":
         return "bottom-4 left-4";
+      case "end-of-video":
+        return "bottom-4 left-1/2 -translate-x-1/2";
       default:
         return "top-4 right-4";
     }
   };
 
-  const getThumbnailStyle = () => {
-    const size = config.thumbnailSize || 64;
-    switch (config.thumbnailShape) {
-      case "circle":
-        return { width: `${size}px`, height: `${size}px`, borderRadius: '50%' };
-      case "portrait":
-        return { width: `${size * 0.75}px`, height: `${size}px`, borderRadius: `${config.cornerRadius}px` };
-      case "square":
+  const getAnimationClass = () => {
+    switch (config.animation) {
+      case "hover":
+        return "hover:scale-105 transition-transform";
+      case "float":
+        return "animate-bounce";
+      case "pulse":
+        return "animate-pulse";
       default:
-        return { width: `${size}px`, height: `${size}px`, borderRadius: `${config.cornerRadius}px` };
+        return "";
     }
   };
 
-  const getAnimationClass = () => {
-    switch (config.animation) {
-      case 'hover':
-        return 'animate-[slow-drift_6s_ease-in-out_infinite]';
-      case 'float':
-        return 'animate-[gentle-float_3s_ease-in-out_infinite]';
-      case 'pulse':
-        return 'animate-[soft-pulse_2s_ease-in-out_infinite]';
+  const getThumbnailClasses = () => {
+    const size = config.thumbnailSize || 64;
+    const sizeClass = `w-[${size}px] h-[${size}px]`;
+    
+    switch (config.thumbnailShape) {
+      case "circle":
+        return `${sizeClass} rounded-full object-cover flex-shrink-0`;
+      case "portrait":
+        return `w-[${size * 0.75}px] h-[${size}px] object-cover flex-shrink-0`;
+      case "square":
       default:
-        return '';
+        return `${sizeClass} object-cover flex-shrink-0`;
     }
   };
 
   const buttonPos = config.buttonPosition || 'below';
-  
-  const getFontFamily = (fontFamily: string | undefined) => {
-    switch (fontFamily) {
-      case 'league-spartan':
-        return 'League Spartan, sans-serif';
-      case 'glacial-indifference':
-        return 'Glacial Indifference, sans-serif';
-      case 'lacquer':
-        return 'Lacquer, cursive';
-      default:
-        return 'inherit';
-    }
-  };
-
-  const getButtonFontStyles = (fontStyle: FontStyle | undefined) => {
-    const baseWeight = config.buttonFontWeight || '400';
-    switch (fontStyle) {
-      case 'bold':
-        return { fontWeight: 'bold', fontStyle: 'normal' };
-      case 'italic':
-        return { fontWeight: baseWeight, fontStyle: 'italic' };
-      case 'bold-italic':
-        return { fontWeight: 'bold', fontStyle: 'italic' };
-      default:
-        return { fontWeight: baseWeight, fontStyle: 'normal' };
-    }
-  };
-
-  const getTitleFontStyles = (fontStyle: FontStyle | undefined) => {
-    switch (fontStyle) {
-      case 'bold':
-        return { fontWeight: 'bold', fontStyle: 'normal' };
-      case 'italic':
-        return { fontWeight: '600', fontStyle: 'italic' };
-      case 'bold-italic':
-        return { fontWeight: 'bold', fontStyle: 'italic' };
-      default:
-        return { fontWeight: '600', fontStyle: 'normal' };
-    }
-  };
 
   const renderButton = () => {
     if (!config.showButton) return null;
-    const buttonFontStyles = getButtonFontStyles(config.buttonFontStyle);
+
+    const buttonFontStyle = config.buttonFontStyle || 'normal';
+    let fontWeight = config.buttonFontWeight || '400';
+    let fontStyle = 'normal';
+
+    if (buttonFontStyle === 'bold') {
+      fontWeight = 'bold';
+      fontStyle = 'normal';
+    } else if (buttonFontStyle === 'italic') {
+      fontStyle = 'italic';
+    } else if (buttonFontStyle === 'bold-italic') {
+      fontWeight = 'bold';
+      fontStyle = 'italic';
+    }
+
     return (
-      <button
+      <a
+        href={product.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-block px-3 py-1.5 text-sm whitespace-nowrap"
         style={{
           backgroundColor: config.buttonBackgroundColor,
           color: config.buttonTextColor,
           fontSize: `${config.buttonFontSize}px`,
-          fontWeight: buttonFontStyles.fontWeight,
-          fontStyle: buttonFontStyles.fontStyle,
+          fontWeight,
+          fontStyle,
           fontFamily: getFontFamily(config.buttonFontFamily),
           borderRadius: `${config.buttonBorderRadius}px`,
+          textDecoration: 'none',
         }}
-        className="px-3 py-1.5 whitespace-nowrap"
       >
         {config.buttonText}
-      </button>
+      </a>
     );
   };
 
   const renderContent = () => {
-    const titleStyles = getTitleFontStyles(config.titleFontStyle);
+    const thumbnailSize = config.thumbnailSize || 64;
+    const thumbnailClasses = getThumbnailClasses();
+    
     return (
       <>
         <img
           src={product.thumbnailUrl}
           alt={product.title}
-          className="object-cover flex-shrink-0"
-          style={getThumbnailStyle()}
+          className={thumbnailClasses}
+          style={{
+            width: config.thumbnailShape === 'portrait' ? `${thumbnailSize * 0.75}px` : `${thumbnailSize}px`,
+            height: `${thumbnailSize}px`,
+            borderRadius: config.thumbnailShape === 'circle' ? '50%' : `${config.cornerRadius}px`,
+          }}
         />
-        <div className="flex-1 min-w-0 space-y-1.5">
+        <div className="flex-1 min-w-0 space-y-1">
           {config.showTitle && (
-            <p 
-              className="text-sm line-clamp-2" 
+            <p
+              className="text-sm font-semibold line-clamp-1"
               style={{
-                ...titleStyles,
+                fontWeight: config.titleFontStyle === 'bold' || config.titleFontStyle === 'bold-italic' ? 'bold' : '600',
+                fontStyle: config.titleFontStyle === 'italic' || config.titleFontStyle === 'bold-italic' ? 'italic' : 'normal',
                 fontFamily: getFontFamily(config.titleFontFamily),
               }}
             >
@@ -1390,7 +1328,7 @@ function ProductCarouselOverlay({ product, config }: { product: Product; config:
             </p>
           )}
           {config.showPrice && (
-            <p 
+            <p
               className="text-sm font-semibold text-primary"
               style={{
                 fontFamily: getFontFamily(config.priceFontFamily),
@@ -1413,7 +1351,7 @@ function ProductCarouselOverlay({ product, config }: { product: Product; config:
 
   return (
     <div 
-      className={`absolute ${getPositionClasses()} ${getAnimationClass()} ${config.transparentBackground ? 'bg-transparent' : 'bg-card/95 backdrop-blur-sm'} ${config.showBorder ? 'shadow-lg border border-border' : ''}`} 
+      className={`absolute ${getPositionClasses()} ${getAnimationClass()} ${config.transparentBackground ? 'bg-transparent' : 'bg-card/95 backdrop-blur-sm'} ${config.showBorder ? 'shadow-lg border border-border' : ''} product-carousel-preview`} 
       style={{ 
         borderRadius: `${config.cornerRadius}px`,
         maxWidth: `${config.carouselWidth || 250}px`,
