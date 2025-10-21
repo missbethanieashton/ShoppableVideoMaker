@@ -16,8 +16,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { FileUpload } from "@/components/ui/file-upload";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { Video, Product, InsertVideo, ProductPlacement, CarouselConfig, CarouselPosition, ThumbnailShape } from "@shared/schema";
-import { defaultCarouselConfig, carouselPositions, thumbnailShapes } from "@shared/schema";
+import type { Video, Product, InsertVideo, ProductPlacement, CarouselConfig, CarouselPosition, ThumbnailShape, CarouselAnimation } from "@shared/schema";
+import { defaultCarouselConfig, carouselPositions, thumbnailShapes, carouselAnimations } from "@shared/schema";
 
 export default function VideoEditor() {
   const params = useParams();
@@ -567,6 +567,23 @@ export default function VideoEditor() {
 
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
+                      <Label>Carousel Width</Label>
+                      <span className="text-sm text-muted-foreground">{carouselConfig.carouselWidth}px</span>
+                    </div>
+                    <Slider
+                      value={[carouselConfig.carouselWidth]}
+                      min={32}
+                      max={250}
+                      step={4}
+                      onValueChange={([value]) =>
+                        setCarouselConfig({ ...carouselConfig, carouselWidth: value })
+                      }
+                      data-testid="slider-carousel-width"
+                    />
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
                       <Label>Corner Radius</Label>
                       <span className="text-sm text-muted-foreground">{carouselConfig.cornerRadius}px</span>
                     </div>
@@ -579,6 +596,55 @@ export default function VideoEditor() {
                       }
                       data-testid="slider-corner-radius"
                     />
+                  </div>
+
+                  <div className="space-y-4">
+                    <h3 className="font-semibold">Carousel Styling</h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="transparent-bg">Transparent Background</Label>
+                        <Switch
+                          id="transparent-bg"
+                          checked={carouselConfig.transparentBackground}
+                          onCheckedChange={(checked) =>
+                            setCarouselConfig({ ...carouselConfig, transparentBackground: checked })
+                          }
+                          data-testid="switch-transparent-bg"
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="show-border">Show Border</Label>
+                        <Switch
+                          id="show-border"
+                          checked={carouselConfig.showBorder}
+                          onCheckedChange={(checked) =>
+                            setCarouselConfig({ ...carouselConfig, showBorder: checked })
+                          }
+                          data-testid="switch-show-border"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h3 className="font-semibold">Animation</h3>
+                    <Select
+                      value={carouselConfig.animation}
+                      onValueChange={(value) =>
+                        setCarouselConfig({ ...carouselConfig, animation: value as CarouselAnimation })
+                      }
+                    >
+                      <SelectTrigger data-testid="select-animation">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {carouselAnimations.map((anim) => (
+                          <SelectItem key={anim} value={anim}>
+                            {anim.charAt(0).toUpperCase() + anim.slice(1)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-4">
