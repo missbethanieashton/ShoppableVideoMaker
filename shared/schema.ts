@@ -37,12 +37,14 @@ export const thumbnailShapes = ["square", "circle", "portrait"] as const;
 export const carouselAnimations = ["none", "hover", "float", "pulse"] as const;
 export const buttonPositions = ["below", "right", "left", "top"] as const;
 export const fontStyles = ["normal", "italic", "bold", "bold-italic"] as const;
+export const fontFamilies = ["default", "league-spartan", "glacial-indifference", "lacquer"] as const;
 
 export type CarouselPosition = typeof carouselPositions[number];
 export type ThumbnailShape = typeof thumbnailShapes[number];
 export type CarouselAnimation = typeof carouselAnimations[number];
 export type ButtonPosition = typeof buttonPositions[number];
 export type FontStyle = typeof fontStyles[number];
+export type FontFamily = typeof fontFamilies[number];
 
 export interface CarouselConfig {
   position: CarouselPosition;
@@ -63,9 +65,12 @@ export interface CarouselConfig {
   buttonFontSize: number;
   buttonFontWeight: string;
   buttonFontStyle: FontStyle;
+  buttonFontFamily: FontFamily;
   buttonBorderRadius: number;
   buttonPosition: ButtonPosition;
   titleFontStyle: FontStyle;
+  titleFontFamily: FontFamily;
+  priceFontFamily: FontFamily;
 }
 
 // Product placement schema (products on timeline)
@@ -115,9 +120,12 @@ export const defaultCarouselConfig: CarouselConfig = {
   buttonFontSize: 14,
   buttonFontWeight: "500",
   buttonFontStyle: "normal",
+  buttonFontFamily: "default",
   buttonBorderRadius: 4,
   buttonPosition: "below",
   titleFontStyle: "normal",
+  titleFontFamily: "default",
+  priceFontFamily: "default",
 };
 
 // Analytics events schema

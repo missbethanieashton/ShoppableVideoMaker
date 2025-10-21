@@ -78,6 +78,15 @@ A professional admin interface for creating interactive shoppable videos with cu
 - **AnalyticsEvent**: id, videoId, productId, eventType (view/product_click), timestamp, metadata
 
 ## Recent Changes
+- Typography & Button Positioning Improvements (October 21, 2025)
+  - **New Feature**: Font family options for button text, title, and price (League Spartan, Glacial Indifference, Lacquer)
+  - **Bug Fix**: Button positioning now works correctly - "Below" position places button below entire content (not next to text)
+  - **Enhancement**: Adjusted padding between button and product thumbnail (increased from 8px to 12px)
+  - **Enhancement**: Button now has proper whitespace-nowrap to prevent text wrapping
+  - **UI Improvement**: Video preview container reduced to 160px (50% smaller) for better page fit
+  - **New Feature**: Collapsible embed code section with toggle button (starts collapsed to save space)
+  - All typography changes work in both editor preview and embed player
+  - Font families loaded via Google Fonts and CDN Fonts
 - Embed Code External Website Compatibility Fix (October 21, 2025)
   - **Critical Fix**: Embed code now works on external websites
   - **Implementation**: GET /api/videos/:id and /api/products/:id convert relative URLs to absolute URLs

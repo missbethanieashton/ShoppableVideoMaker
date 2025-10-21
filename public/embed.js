@@ -1,4 +1,18 @@
 (function() {
+  // Inject font imports
+  if (!document.getElementById('shoppable-video-fonts')) {
+    const fontLink1 = document.createElement('link');
+    fontLink1.id = 'shoppable-video-fonts';
+    fontLink1.href = 'https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700&family=Lacquer&display=swap';
+    fontLink1.rel = 'stylesheet';
+    document.head.appendChild(fontLink1);
+    
+    const fontLink2 = document.createElement('link');
+    fontLink2.href = 'https://fonts.cdnfonts.com/css/glacial-indifference-2';
+    fontLink2.rel = 'stylesheet';
+    document.head.appendChild(fontLink2);
+  }
+
   // Inject animation styles
   if (!document.getElementById('shoppable-video-styles')) {
     const style = document.createElement('style');
@@ -41,6 +55,19 @@
     videoId: null,
     viewTracked: false,
     productCache: new Map(),
+
+    getFontFamily: function(fontFamily) {
+      switch (fontFamily) {
+        case 'league-spartan':
+          return 'League Spartan, sans-serif';
+        case 'glacial-indifference':
+          return 'Glacial Indifference, sans-serif';
+        case 'lacquer':
+          return 'Lacquer, cursive';
+        default:
+          return 'inherit';
+      }
+    },
 
     init: function(options) {
       const { containerId, videoId, apiUrl } = options;
@@ -230,6 +257,7 @@
           title.style.fontStyle = 'normal';
         }
         
+        title.style.fontFamily = this.getFontFamily(config.titleFontFamily);
         title.style.margin = '0';
         title.style.lineHeight = '1.4';
         title.style.color = '#000';
@@ -243,6 +271,7 @@
         price.style.fontWeight = '600';
         price.style.margin = '0';
         price.style.color = '#6366f1';
+        price.style.fontFamily = this.getFontFamily(config.priceFontFamily);
         info.appendChild(price);
       }
 
@@ -286,23 +315,37 @@
           button.style.fontStyle = 'normal';
         }
         
+        button.style.fontFamily = this.getFontFamily(config.buttonFontFamily);
         button.style.borderRadius = `${config.buttonBorderRadius}px`;
         button.style.textDecoration = 'none';
         button.style.cursor = 'pointer';
         button.style.border = 'none';
+        button.style.whiteSpace = 'nowrap';
       }
 
       // Layout based on button position
       const buttonPos = config.buttonPosition || 'below';
       if (buttonPos === 'below') {
-        // Default: button below info
-        content.appendChild(thumbnail);
-        content.appendChild(info);
+        // Button below entire content
+        const wrapper = document.createElement('div');
+        wrapper.style.display = 'flex';
+        wrapper.style.flexDirection = 'column';
+        wrapper.style.gap = '12px';
+        
+        const contentRow = document.createElement('div');
+        contentRow.style.display = 'flex';
+        contentRow.style.gap = '12px';
+        contentRow.style.alignItems = 'flex-start';
+        contentRow.appendChild(thumbnail);
+        contentRow.appendChild(info);
+        
+        wrapper.appendChild(contentRow);
         if (button) {
-          button.style.marginTop = '8px';
-          info.appendChild(button);
+          button.style.width = '100%';
+          button.style.textAlign = 'center';
+          wrapper.appendChild(button);
         }
-        carousel.appendChild(content);
+        carousel.appendChild(wrapper);
       } else if (buttonPos === 'right') {
         // Button to the right of content
         content.appendChild(thumbnail);

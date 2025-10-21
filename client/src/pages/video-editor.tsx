@@ -17,8 +17,8 @@ import { FileUpload } from "@/components/ui/file-upload";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { Video, Product, InsertVideo, ProductPlacement, CarouselConfig, CarouselPosition, ThumbnailShape, CarouselAnimation, ButtonPosition, FontStyle } from "@shared/schema";
-import { defaultCarouselConfig, carouselPositions, thumbnailShapes, carouselAnimations, buttonPositions, fontStyles } from "@shared/schema";
+import type { Video, Product, InsertVideo, ProductPlacement, CarouselConfig, CarouselPosition, ThumbnailShape, CarouselAnimation, ButtonPosition, FontStyle, FontFamily } from "@shared/schema";
+import { defaultCarouselConfig, carouselPositions, thumbnailShapes, carouselAnimations, buttonPositions, fontStyles, fontFamilies } from "@shared/schema";
 
 export default function VideoEditor() {
   const params = useParams();
@@ -679,26 +679,47 @@ export default function VideoEditor() {
                         />
                       </div>
                       {carouselConfig.showTitle && (
-                        <div>
-                          <Label>Title Font Style</Label>
-                          <Select
-                            value={carouselConfig.titleFontStyle}
-                            onValueChange={(value: FontStyle) =>
-                              setCarouselConfig({ ...carouselConfig, titleFontStyle: value })
-                            }
-                          >
-                            <SelectTrigger data-testid="select-title-font-style">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {fontStyles.map((style) => (
-                                <SelectItem key={style} value={style}>
-                                  {style.charAt(0).toUpperCase() + style.slice(1)}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
+                        <>
+                          <div>
+                            <Label>Title Font Style</Label>
+                            <Select
+                              value={carouselConfig.titleFontStyle}
+                              onValueChange={(value: FontStyle) =>
+                                setCarouselConfig({ ...carouselConfig, titleFontStyle: value })
+                              }
+                            >
+                              <SelectTrigger data-testid="select-title-font-style">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {fontStyles.map((style) => (
+                                  <SelectItem key={style} value={style}>
+                                    {style.charAt(0).toUpperCase() + style.slice(1)}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label>Title Font Family</Label>
+                            <Select
+                              value={carouselConfig.titleFontFamily || "default"}
+                              onValueChange={(value: FontFamily) =>
+                                setCarouselConfig({ ...carouselConfig, titleFontFamily: value })
+                              }
+                            >
+                              <SelectTrigger data-testid="select-title-font-family">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="default">Default</SelectItem>
+                                <SelectItem value="league-spartan">League Spartan</SelectItem>
+                                <SelectItem value="glacial-indifference">Glacial Indifference</SelectItem>
+                                <SelectItem value="lacquer">Lacquer</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </>
                       )}
                       <div className="flex items-center justify-between">
                         <Label htmlFor="show-price">Show Price</Label>
@@ -711,6 +732,27 @@ export default function VideoEditor() {
                           data-testid="switch-show-price"
                         />
                       </div>
+                      {carouselConfig.showPrice && (
+                        <div>
+                          <Label>Price Font Family</Label>
+                          <Select
+                            value={carouselConfig.priceFontFamily || "default"}
+                            onValueChange={(value: FontFamily) =>
+                              setCarouselConfig({ ...carouselConfig, priceFontFamily: value })
+                            }
+                          >
+                            <SelectTrigger data-testid="select-price-font-family">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="default">Default</SelectItem>
+                              <SelectItem value="league-spartan">League Spartan</SelectItem>
+                              <SelectItem value="glacial-indifference">Glacial Indifference</SelectItem>
+                              <SelectItem value="lacquer">Lacquer</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
                       <div className="flex items-center justify-between">
                         <Label htmlFor="show-description">Show Description</Label>
                         <Switch
@@ -822,6 +864,25 @@ export default function VideoEditor() {
                                   {style.charAt(0).toUpperCase() + style.slice(1)}
                                 </SelectItem>
                               ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label>Font Family</Label>
+                          <Select
+                            value={carouselConfig.buttonFontFamily || "default"}
+                            onValueChange={(value: FontFamily) =>
+                              setCarouselConfig({ ...carouselConfig, buttonFontFamily: value })
+                            }
+                          >
+                            <SelectTrigger data-testid="select-button-font-family">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="default">Default</SelectItem>
+                              <SelectItem value="league-spartan">League Spartan</SelectItem>
+                              <SelectItem value="glacial-indifference">Glacial Indifference</SelectItem>
+                              <SelectItem value="lacquer">Lacquer</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -1109,6 +1170,19 @@ function ProductCarouselOverlay({ product, config }: { product: Product; config:
 
   const buttonPos = config.buttonPosition || 'below';
   
+  const getFontFamily = (fontFamily: string | undefined) => {
+    switch (fontFamily) {
+      case 'league-spartan':
+        return 'League Spartan, sans-serif';
+      case 'glacial-indifference':
+        return 'Glacial Indifference, sans-serif';
+      case 'lacquer':
+        return 'Lacquer, cursive';
+      default:
+        return 'inherit';
+    }
+  };
+
   const getButtonFontStyles = (fontStyle: FontStyle | undefined) => {
     const baseWeight = config.buttonFontWeight || '400';
     switch (fontStyle) {
@@ -1147,9 +1221,10 @@ function ProductCarouselOverlay({ product, config }: { product: Product; config:
           fontSize: `${config.buttonFontSize}px`,
           fontWeight: buttonFontStyles.fontWeight,
           fontStyle: buttonFontStyles.fontStyle,
+          fontFamily: getFontFamily(config.buttonFontFamily),
           borderRadius: `${config.buttonBorderRadius}px`,
         }}
-        className="px-3 py-1"
+        className="px-3 py-1.5 whitespace-nowrap"
       >
         {config.buttonText}
       </button>
@@ -1157,25 +1232,40 @@ function ProductCarouselOverlay({ product, config }: { product: Product; config:
   };
 
   const renderContent = () => {
+    const titleStyles = getTitleFontStyles(config.titleFontStyle);
     return (
       <>
         <img
           src={product.thumbnailUrl}
           alt={product.title}
-          className="object-cover"
+          className="object-cover flex-shrink-0"
           style={getThumbnailStyle()}
         />
-        <div className="flex-1 min-w-0 space-y-1">
+        <div className="flex-1 min-w-0 space-y-1.5">
           {config.showTitle && (
-            <p className="text-sm line-clamp-2" style={getTitleFontStyles(config.titleFontStyle)}>{product.title}</p>
+            <p 
+              className="text-sm line-clamp-2" 
+              style={{
+                ...titleStyles,
+                fontFamily: getFontFamily(config.titleFontFamily),
+              }}
+            >
+              {product.title}
+            </p>
           )}
           {config.showPrice && (
-            <p className="text-sm font-semibold text-primary">{product.price}</p>
+            <p 
+              className="text-sm font-semibold text-primary"
+              style={{
+                fontFamily: getFontFamily(config.priceFontFamily),
+              }}
+            >
+              {product.price}
+            </p>
           )}
           {config.showDescription && product.description && (
             <p className="text-xs text-muted-foreground line-clamp-2">{product.description}</p>
           )}
-          {buttonPos === 'below' && renderButton()}
         </div>
       </>
     );
@@ -1190,14 +1280,21 @@ function ProductCarouselOverlay({ product, config }: { product: Product; config:
       }}
     >
       {buttonPos === 'top' && (
-        <div className="mb-2 w-full">
+        <div className="mb-3 w-full">
           {renderButton()}
         </div>
       )}
-      <div className={`flex gap-3 ${buttonPos === 'left' || buttonPos === 'right' ? 'items-center' : ''}`}>
-        {buttonPos === 'left' && <div>{renderButton()}</div>}
-        {renderContent()}
-        {buttonPos === 'right' && <div>{renderButton()}</div>}
+      <div className={`flex gap-3 ${buttonPos === 'left' || buttonPos === 'right' ? 'items-center' : 'flex-col'}`}>
+        {buttonPos === 'left' && <div className="flex-shrink-0">{renderButton()}</div>}
+        <div className={`flex gap-3 ${buttonPos === 'below' ? 'flex-col' : 'items-center'}`}>
+          {renderContent()}
+          {buttonPos === 'below' && (
+            <div className="w-full mt-1">
+              {renderButton()}
+            </div>
+          )}
+        </div>
+        {buttonPos === 'right' && <div className="flex-shrink-0">{renderButton()}</div>}
       </div>
     </div>
   );

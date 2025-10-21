@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500;600;700&family=Lacquer&display=swap');
+@import url('https://fonts.cdnfonts.com/css/glacial-indifference-2');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
