@@ -376,7 +376,7 @@ export default function VideoEditor() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="relative max-w-md w-full">
+              <div className="relative max-w-sm w-full">
                 <video
                   ref={videoRef}
                   src={videoFile}
