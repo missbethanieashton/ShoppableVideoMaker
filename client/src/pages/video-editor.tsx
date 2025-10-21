@@ -1282,28 +1282,28 @@ function ProductCarouselOverlay({
     }
   };
 
-  const getPositionClasses = () => {
+  const getPositionStyles = () => {
     switch (config.position) {
       case "top-right":
-        return "top-4 right-4";
+        return { top: '3px', right: '3px' };
       case "top-center":
-        return "top-4 left-1/2 -translate-x-1/2";
+        return { top: '3px', left: '50%', transform: 'translateX(-50%)' };
       case "top-left":
-        return "top-4 left-4";
+        return { top: '3px', left: '3px' };
       case "side-right":
-        return "right-4 top-1/2 -translate-y-1/2";
+        return { right: '3px', top: '50%', transform: 'translateY(-50%)' };
       case "side-left":
-        return "left-4 top-1/2 -translate-y-1/2";
+        return { left: '3px', top: '50%', transform: 'translateY(-50%)' };
       case "bottom-right":
-        return "bottom-4 right-4";
+        return { bottom: '3px', right: '3px' };
       case "bottom-center":
-        return "bottom-4 left-1/2 -translate-x-1/2";
+        return { bottom: '3px', left: '50%', transform: 'translateX(-50%)' };
       case "bottom-left":
-        return "bottom-4 left-4";
+        return { bottom: '3px', left: '3px' };
       case "end-of-video":
-        return "bottom-4 left-1/2 -translate-x-1/2";
+        return { bottom: '3px', left: '50%', transform: 'translateX(-50%)' };
       default:
-        return "top-4 right-4";
+        return { top: '3px', right: '3px' };
     }
   };
 
@@ -1491,8 +1491,9 @@ function ProductCarouselOverlay({
 
   return (
     <div 
-      className={`absolute ${getPositionClasses()} ${getAnimationClass()} ${config.transparentBackground ? 'bg-transparent' : 'bg-card/95 backdrop-blur-sm'} ${config.showBorder ? 'shadow-lg border border-border' : ''} product-carousel-preview`} 
+      className={`absolute ${getAnimationClass()} ${config.transparentBackground ? 'bg-transparent' : 'bg-card/95 backdrop-blur-sm'} ${config.showBorder ? 'shadow-lg border border-border' : ''} product-carousel-preview`} 
       style={{ 
+        ...getPositionStyles(),
         borderRadius: `${config.cornerRadius}px`,
         maxWidth: `${config.carouselWidth || 250}px`,
         padding: `${padding}px`

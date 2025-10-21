@@ -610,23 +610,23 @@
     getPositionStyles: function(position) {
       switch (position) {
         case 'top-right':
-          return { top: '16px', right: '16px' };
+          return { top: '3px', right: '3px' };
         case 'top-center':
-          return { top: '16px', left: '50%', transform: 'translateX(-50%)' };
+          return { top: '3px', left: '50%', transform: 'translateX(-50%)' };
         case 'top-left':
-          return { top: '16px', left: '16px' };
+          return { top: '3px', left: '3px' };
         case 'side-right':
-          return { right: '16px', top: '50%', transform: 'translateY(-50%)' };
+          return { right: '3px', top: '50%', transform: 'translateY(-50%)' };
         case 'side-left':
-          return { left: '16px', top: '50%', transform: 'translateY(-50%)' };
+          return { left: '3px', top: '50%', transform: 'translateY(-50%)' };
         case 'bottom-right':
-          return { bottom: '16px', right: '16px' };
+          return { bottom: '3px', right: '3px' };
         case 'bottom-center':
-          return { bottom: '16px', left: '50%', transform: 'translateX(-50%)' };
+          return { bottom: '3px', left: '50%', transform: 'translateX(-50%)' };
         case 'bottom-left':
-          return { bottom: '16px', left: '16px' };
+          return { bottom: '3px', left: '3px' };
         default:
-          return { top: '16px', right: '16px' };
+          return { top: '3px', right: '3px' };
       }
     },
 
