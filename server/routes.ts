@@ -67,7 +67,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!product) {
         return res.status(404).json({ error: "Product not found" });
       }
-      res.json(product);
+      
+      // Convert relative URLs to absolute URLs for embed compatibility
+      const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+      const host = req.headers['x-forwarded-host'] || req.get('host');
+      const baseUrl = `${protocol}://${host}`;
+      
+      const absoluteProduct = {
+        ...product,
+        thumbnailUrl: product.thumbnailUrl && !product.thumbnailUrl.startsWith('http')
+          ? `${baseUrl}${product.thumbnailUrl}`
+          : product.thumbnailUrl
+      };
+      
+      res.json(absoluteProduct);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch product" });
     }
@@ -112,7 +125,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!video) {
         return res.status(404).json({ error: "Video not found" });
       }
-      res.json(video);
+      
+      // Convert relative URLs to absolute URLs for embed compatibility
+      const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+      const host = req.headers['x-forwarded-host'] || req.get('host');
+      const baseUrl = `${protocol}://${host}`;
+      
+      const absoluteVideo = {
+        ...video,
+        videoUrl: video.videoUrl.startsWith('http') ? video.videoUrl : `${baseUrl}${video.videoUrl}`,
+        thumbnailUrl: video.thumbnailUrl && !video.thumbnailUrl.startsWith('http') 
+          ? `${baseUrl}${video.thumbnailUrl}` 
+          : video.thumbnailUrl
+      };
+      
+      res.json(absoluteVideo);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch video" });
     }
