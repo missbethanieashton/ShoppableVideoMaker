@@ -129,9 +129,8 @@
       thumbnail.src = product.thumbnailUrl;
       thumbnail.alt = product.title;
       thumbnail.style.objectFit = 'cover';
-      thumbnail.style.borderRadius = `${config.cornerRadius}px`;
       
-      const thumbnailStyles = this.getThumbnailStyles(config.thumbnailShape);
+      const thumbnailStyles = this.getThumbnailStyles(config);
       Object.assign(thumbnail.style, thumbnailStyles);
 
       const info = document.createElement('div');
@@ -243,15 +242,28 @@
       }
     },
 
-    getThumbnailStyles: function(shape) {
-      switch (shape) {
+    getThumbnailStyles: function(config) {
+      const size = config.thumbnailSize || 64;
+      switch (config.thumbnailShape) {
         case 'circle':
-          return { width: '64px', height: '64px', borderRadius: '50%' };
+          return { 
+            width: `${size}px`, 
+            height: `${size}px`, 
+            borderRadius: '50%' 
+          };
         case 'portrait':
-          return { width: '48px', height: '64px' };
+          return { 
+            width: `${size * 0.75}px`, 
+            height: `${size}px`,
+            borderRadius: `${config.cornerRadius}px`
+          };
         case 'square':
         default:
-          return { width: '64px', height: '64px' };
+          return { 
+            width: `${size}px`, 
+            height: `${size}px`,
+            borderRadius: `${config.cornerRadius}px`
+          };
       }
     }
   };

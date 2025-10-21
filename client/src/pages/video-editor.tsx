@@ -516,6 +516,23 @@ export default function VideoEditor() {
 
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
+                      <Label>Thumbnail Size</Label>
+                      <span className="text-sm text-muted-foreground">{carouselConfig.thumbnailSize}px</span>
+                    </div>
+                    <Slider
+                      value={[carouselConfig.thumbnailSize]}
+                      min={32}
+                      max={128}
+                      step={4}
+                      onValueChange={([value]) =>
+                        setCarouselConfig({ ...carouselConfig, thumbnailSize: value })
+                      }
+                      data-testid="slider-thumbnail-size"
+                    />
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
                       <Label>Corner Radius</Label>
                       <span className="text-sm text-muted-foreground">{carouselConfig.cornerRadius}px</span>
                     </div>
@@ -621,9 +638,12 @@ export default function VideoEditor() {
                           <Input
                             type="number"
                             value={carouselConfig.buttonFontSize}
-                            onChange={(e) =>
-                              setCarouselConfig({ ...carouselConfig, buttonFontSize: parseInt(e.target.value) })
-                            }
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value);
+                              if (!isNaN(value) && value > 0) {
+                                setCarouselConfig({ ...carouselConfig, buttonFontSize: value });
+                              }
+                            }}
                             data-testid="input-button-font-size"
                           />
                         </div>
@@ -645,6 +665,20 @@ export default function VideoEditor() {
                               <SelectItem value="700">Bold</SelectItem>
                             </SelectContent>
                           </Select>
+                        </div>
+                        <div>
+                          <Label>Border Radius</Label>
+                          <Input
+                            type="number"
+                            value={carouselConfig.buttonBorderRadius}
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value);
+                              if (!isNaN(value) && value >= 0) {
+                                setCarouselConfig({ ...carouselConfig, buttonBorderRadius: value });
+                              }
+                            }}
+                            data-testid="input-button-border-radius"
+                          />
                         </div>
                       </div>
                     </div>
@@ -857,16 +891,16 @@ function ProductCarouselOverlay({ product, config }: { product: Product; config:
     }
   };
 
-  const getThumbnailClasses = () => {
-    const base = "object-cover";
+  const getThumbnailStyle = () => {
+    const size = config.thumbnailSize || 64;
     switch (config.thumbnailShape) {
       case "circle":
-        return `${base} rounded-full w-16 h-16`;
+        return { width: `${size}px`, height: `${size}px`, borderRadius: '50%' };
       case "portrait":
-        return `${base} w-12 h-16`;
+        return { width: `${size * 0.75}px`, height: `${size}px`, borderRadius: `${config.cornerRadius}px` };
       case "square":
       default:
-        return `${base} w-16 h-16`;
+        return { width: `${size}px`, height: `${size}px`, borderRadius: `${config.cornerRadius}px` };
     }
   };
 
@@ -876,8 +910,8 @@ function ProductCarouselOverlay({ product, config }: { product: Product; config:
         <img
           src={product.thumbnailUrl}
           alt={product.title}
-          className={getThumbnailClasses()}
-          style={{ borderRadius: `${config.cornerRadius}px` }}
+          className="object-cover"
+          style={getThumbnailStyle()}
         />
         <div className="flex-1 min-w-0 space-y-1">
           {config.showTitle && (

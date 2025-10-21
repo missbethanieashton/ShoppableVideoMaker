@@ -41,6 +41,7 @@ export type ThumbnailShape = typeof thumbnailShapes[number];
 export interface CarouselConfig {
   position: CarouselPosition;
   thumbnailShape: ThumbnailShape;
+  thumbnailSize: number; // Size in pixels (width/height for square/circle, width for portrait)
   cornerRadius: number;
   showTitle: boolean;
   showPrice: boolean;
@@ -85,6 +86,7 @@ export type Video = typeof videos.$inferSelect;
 export const defaultCarouselConfig: CarouselConfig = {
   position: "top-right",
   thumbnailShape: "square",
+  thumbnailSize: 64, // Default 64px thumbnail size
   cornerRadius: 0,
   showTitle: false,
   showPrice: false,
