@@ -1,4 +1,39 @@
 (function() {
+  // Inject animation styles
+  if (!document.getElementById('shoppable-video-styles')) {
+    const style = document.createElement('style');
+    style.id = 'shoppable-video-styles';
+    style.textContent = `
+      @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+      }
+      
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+      }
+      
+      .shoppable-carousel.animation-hover {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      
+      .shoppable-carousel.animation-hover:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.25) !important;
+      }
+      
+      .shoppable-carousel.animation-float {
+        animation: float 3s ease-in-out infinite;
+      }
+      
+      .shoppable-carousel.animation-pulse {
+        animation: pulse 2s ease-in-out infinite;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
   window.ShoppableVideo = {
     apiUrl: null,
     videoId: null,
@@ -119,14 +154,36 @@
     createCarousel: function(product, config) {
       const carousel = document.createElement('div');
       carousel.style.position = 'absolute';
-      carousel.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
-      carousel.style.backdropFilter = 'blur(10px)';
-      carousel.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+      
+      // Background styling
+      if (config.transparentBackground) {
+        carousel.style.backgroundColor = 'transparent';
+        carousel.style.backdropFilter = 'none';
+      } else {
+        carousel.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+        carousel.style.backdropFilter = 'blur(10px)';
+      }
+      
+      // Border styling
+      if (config.showBorder) {
+        carousel.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+        carousel.style.border = '1px solid rgba(0,0,0,0.1)';
+      } else {
+        carousel.style.boxShadow = 'none';
+        carousel.style.border = 'none';
+      }
+      
       carousel.style.padding = '12px';
-      carousel.style.maxWidth = '320px';
+      carousel.style.maxWidth = `${config.carouselWidth || 250}px`;
       carousel.style.borderRadius = `${config.cornerRadius}px`;
       carousel.style.pointerEvents = 'auto';
       carousel.style.zIndex = '1000';
+      
+      // Add animation class
+      carousel.className = 'shoppable-carousel';
+      if (config.animation && config.animation !== 'none') {
+        carousel.className += ` animation-${config.animation}`;
+      }
 
       const positionStyles = this.getPositionStyles(config.position);
       Object.assign(carousel.style, positionStyles);
