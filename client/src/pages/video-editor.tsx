@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { FileUpload } from "@/components/ui/file-upload";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -34,6 +35,11 @@ export default function VideoEditor() {
   const [selectedPlacement, setSelectedPlacement] = useState<ProductPlacement | null>(null);
   const [addProductDialogOpen, setAddProductDialogOpen] = useState(false);
   const [publishDialogOpen, setPublishDialogOpen] = useState(false);
+  const [publishedVideo, setPublishedVideo] = useState<Video | null>(null);
+  const [draggingPlacement, setDraggingPlacement] = useState<string | null>(null);
+  const [dragOffset, setDragOffset] = useState<number>(0);
+  const [resizingPlacement, setResizingPlacement] = useState<{ id: string; edge: 'left' | 'right' } | null>(null);
+  const timelineRef = useRef<HTMLDivElement>(null);
 
   const isNew = params.id === "new";
 
@@ -111,6 +117,9 @@ export default function VideoEditor() {
     setProductPlacements(productPlacements.map(p =>
       p.id === placementId ? { ...p, ...updates } : p
     ));
+    if (selectedPlacement?.id === placementId) {
+      setSelectedPlacement(prev => prev ? { ...prev, ...updates } : null);
+    }
   };
 
   const saveMutation = useMutation({
@@ -151,14 +160,40 @@ export default function VideoEditor() {
   });
 
   const publishMutation = useMutation({
-    mutationFn: async () => {
-      return apiRequest("PATCH", `/api/videos/${params.id}/publish`, {});
+    mutationFn: async (): Promise<Video> => {
+      const response = await apiRequest("PATCH", `/api/videos/${params.id}/publish`, {});
+      return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data: Video) => {
       queryClient.invalidateQueries({ queryKey: ["/api/videos"] });
+      setPublishedVideo(data);
       setPublishDialogOpen(true);
     },
   });
+
+  const generateEmbedCode = (video: Video) => {
+    const baseUrl = window.location.origin;
+    return `<div id="shoppable-video-${video.id}"></div>
+<script src="${baseUrl}/embed.js"></script>
+<script>
+  ShoppableVideo.init({
+    containerId: 'shoppable-video-${video.id}',
+    videoId: '${video.id}',
+    apiUrl: '${baseUrl}/api'
+  });
+</script>`;
+  };
+
+  const handleCopyEmbed = () => {
+    if (publishedVideo) {
+      const embedCode = generateEmbedCode(publishedVideo);
+      navigator.clipboard.writeText(embedCode);
+      toast({
+        title: "Copied to clipboard",
+        description: "Embed code has been copied successfully.",
+      });
+    }
+  };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -171,6 +206,77 @@ export default function VideoEditor() {
       p => currentTime >= p.startTime && currentTime <= p.endTime
     );
   };
+
+  const handlePlacementDragStart = (e: React.MouseEvent, placementId: string) => {
+    e.stopPropagation();
+    if (!timelineRef.current) return;
+
+    const placement = productPlacements.find(p => p.id === placementId);
+    if (!placement) return;
+
+    const rect = timelineRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const timeAtCursor = (x / rect.width) * videoDuration;
+    
+    setDragOffset(timeAtCursor - placement.startTime);
+    setDraggingPlacement(placementId);
+  };
+
+  const handleResizeStart = (e: React.MouseEvent, placementId: string, edge: 'left' | 'right') => {
+    e.stopPropagation();
+    setResizingPlacement({ id: placementId, edge });
+  };
+
+  const handleTimelineMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!timelineRef.current || (!draggingPlacement && !resizingPlacement)) return;
+
+    const rect = timelineRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const timeAtCursor = (x / rect.width) * videoDuration;
+
+    if (draggingPlacement) {
+      const placement = productPlacements.find(p => p.id === draggingPlacement);
+      if (placement) {
+        const duration = placement.endTime - placement.startTime;
+        const newStartTime = Math.max(0, Math.min(videoDuration - duration, timeAtCursor - dragOffset));
+        const newEndTime = newStartTime + duration;
+        
+        updatePlacement(draggingPlacement, {
+          startTime: newStartTime,
+          endTime: newEndTime,
+        });
+      }
+    } else if (resizingPlacement) {
+      const placement = productPlacements.find(p => p.id === resizingPlacement.id);
+      if (placement) {
+        if (resizingPlacement.edge === 'left') {
+          const newStartTime = Math.max(0, Math.min(placement.endTime - 1, timeAtCursor));
+          updatePlacement(resizingPlacement.id, { startTime: newStartTime });
+        } else {
+          const newEndTime = Math.max(placement.startTime + 1, Math.min(videoDuration, timeAtCursor));
+          updatePlacement(resizingPlacement.id, { endTime: newEndTime });
+        }
+      }
+    }
+  };
+
+  const handleTimelineMouseUp = () => {
+    setDraggingPlacement(null);
+    setResizingPlacement(null);
+    setDragOffset(0);
+  };
+
+  useEffect(() => {
+    if (draggingPlacement || resizingPlacement) {
+      const handleGlobalMouseUp = () => {
+        setDraggingPlacement(null);
+        setResizingPlacement(null);
+        setDragOffset(0);
+      };
+      window.addEventListener('mouseup', handleGlobalMouseUp);
+      return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
+    }
+  }, [draggingPlacement, resizingPlacement]);
 
   return (
     <div className="h-full flex flex-col">
@@ -285,34 +391,63 @@ export default function VideoEditor() {
                 </span>
               </div>
 
-              <div className="relative h-20 bg-muted/50 rounded-md overflow-hidden">
+              <div 
+                ref={timelineRef}
+                className="relative h-20 bg-muted/50 rounded-md overflow-hidden select-none"
+                onMouseMove={handleTimelineMouseMove}
+                onMouseUp={handleTimelineMouseUp}
+              >
                 <div className="absolute inset-0 flex items-center px-2">
                   {productPlacements.map((placement) => {
                     const product = products?.find(p => p.id === placement.productId);
                     const left = (placement.startTime / videoDuration) * 100;
                     const width = ((placement.endTime - placement.startTime) / videoDuration) * 100;
+                    const isSelected = selectedPlacement?.id === placement.id;
+                    const isDragging = draggingPlacement === placement.id;
+                    const isResizing = resizingPlacement?.id === placement.id;
 
                     return (
                       <div
                         key={placement.id}
-                        className="absolute h-12 bg-primary/20 border-2 border-primary rounded-md flex items-center justify-center cursor-pointer hover-elevate"
+                        className={`absolute h-12 bg-primary/20 border-2 rounded-md flex items-center justify-center group ${
+                          isSelected ? 'border-primary ring-2 ring-primary/50' : 'border-primary'
+                        } ${isDragging || isResizing ? 'cursor-grabbing' : 'cursor-grab'}`}
                         style={{ left: `${left}%`, width: `${width}%` }}
+                        onMouseDown={(e) => handlePlacementDragStart(e, placement.id)}
                         onClick={() => setSelectedPlacement(placement)}
                         data-testid={`placement-${placement.id}`}
                       >
+                        <div
+                          className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-primary/50 transition-colors"
+                          onMouseDown={(e) => {
+                            e.stopPropagation();
+                            handleResizeStart(e, placement.id, 'left');
+                          }}
+                          data-testid={`resize-left-${placement.id}`}
+                        />
+                        
                         {product && (
                           <img
                             src={product.thumbnailUrl}
                             alt={product.title}
-                            className="h-full w-auto object-cover rounded"
+                            className="h-full w-auto object-cover rounded pointer-events-none"
                           />
                         )}
+                        
+                        <div
+                          className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize hover:bg-primary/50 transition-colors"
+                          onMouseDown={(e) => {
+                            e.stopPropagation();
+                            handleResizeStart(e, placement.id, 'right');
+                          }}
+                          data-testid={`resize-right-${placement.id}`}
+                        />
                       </div>
                     );
                   })}
                 </div>
                 <div
-                  className="absolute top-0 bottom-0 w-0.5 bg-accent pointer-events-none"
+                  className="absolute top-0 bottom-0 w-0.5 bg-accent pointer-events-none z-10"
                   style={{ left: `${(currentTime / videoDuration) * 100}%` }}
                 />
               </div>
@@ -658,16 +793,40 @@ export default function VideoEditor() {
       </Dialog>
 
       <Dialog open={publishDialogOpen} onOpenChange={setPublishDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Video Published!</DialogTitle>
             <DialogDescription>
-              Your video has been published and is ready to embed
+              Your video has been published. Copy the embed code below to add it to your website.
             </DialogDescription>
           </DialogHeader>
-          <Button onClick={() => navigate("/")} data-testid="button-go-to-library">
-            Go to Video Library
-          </Button>
+          {publishedVideo && (
+            <div className="space-y-4">
+              <Textarea
+                readOnly
+                value={generateEmbedCode(publishedVideo)}
+                className="font-mono text-xs h-48"
+                data-testid="textarea-embed-code"
+              />
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleCopyEmbed}
+                  className="flex-1"
+                  data-testid="button-copy-embed"
+                >
+                  <Code className="w-4 h-4 mr-2" />
+                  Copy Embed Code
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => navigate("/")} 
+                  data-testid="button-go-to-library"
+                >
+                  Go to Library
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
