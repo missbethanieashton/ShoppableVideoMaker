@@ -18,7 +18,7 @@ import { FileUpload } from "@/components/ui/file-upload";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { Video, Product, InsertVideo, ProductPlacement, CarouselConfig, CarouselPosition, ThumbnailShape, CarouselAnimation, ButtonPosition, FontStyle, FontFamily } from "@shared/schema";
+import type { Video, Product, InsertVideo, ProductPlacement, CarouselConfig, CarouselPosition, ThumbnailShape, CarouselAnimation, ButtonPosition, FontStyle, FontFamily, TextAnimation } from "@shared/schema";
 import { defaultCarouselConfig, carouselPositions, thumbnailShapes, carouselAnimations, buttonPositions, fontStyles, fontFamilies } from "@shared/schema";
 
 export default function VideoEditor() {
@@ -792,7 +792,7 @@ export default function VideoEditor() {
                   </div>
 
                   <div className="space-y-4">
-                    <h3 className="font-semibold">Animation</h3>
+                    <h3 className="font-semibold">Carousel Animation</h3>
                     <Select
                       value={carouselConfig.animation}
                       onValueChange={(value) =>
@@ -810,6 +810,43 @@ export default function VideoEditor() {
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h3 className="font-semibold">Text Animation</h3>
+                    <Select
+                      value={carouselConfig.textAnimation || "none"}
+                      onValueChange={(value) =>
+                        setCarouselConfig({ ...carouselConfig, textAnimation: value as TextAnimation })
+                      }
+                    >
+                      <SelectTrigger data-testid="select-text-animation">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">None</SelectItem>
+                        <SelectItem value="typewriter-slow">Typewriter (Slow)</SelectItem>
+                        <SelectItem value="typewriter-medium">Typewriter (Medium)</SelectItem>
+                        <SelectItem value="typewriter-fast">Typewriter (Fast)</SelectItem>
+                        <SelectItem value="glow">Glow</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="enable-scroll">Enable Text Scroll</Label>
+                      <Switch
+                        id="enable-scroll"
+                        checked={carouselConfig.enableScroll || false}
+                        onCheckedChange={(checked) =>
+                          setCarouselConfig({ ...carouselConfig, enableScroll: checked })
+                        }
+                        data-testid="switch-enable-scroll"
+                      />
+                    </div>
+                    {carouselConfig.enableScroll && (
+                      <p className="text-xs text-muted-foreground">
+                        Scrolls between Title, Price, and Button text with 1s intervals
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-4">
@@ -1203,6 +1240,19 @@ function ProductCarouselOverlay({
   product: Product;
   config: CarouselConfig;
 }) {
+  const [scrollIndex, setScrollIndex] = useState(0);
+  
+  // Scroll cycling effect
+  useEffect(() => {
+    if (!config.enableScroll) return;
+    
+    const interval = setInterval(() => {
+      setScrollIndex((prev) => (prev + 1) % 3); // Cycle through 0, 1, 2
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [config.enableScroll]);
+  
   const getFontFamily = (fontFamily: FontFamily): string => {
     switch (fontFamily) {
       case 'league-spartan':
@@ -1213,6 +1263,22 @@ function ProductCarouselOverlay({
         return 'Lacquer, cursive';
       default:
         return 'inherit';
+    }
+  };
+  
+  const getTextAnimationClass = () => {
+    const animation = config.textAnimation || 'none';
+    switch (animation) {
+      case 'typewriter-slow':
+        return 'text-typewriter-slow';
+      case 'typewriter-medium':
+        return 'text-typewriter-medium';
+      case 'typewriter-fast':
+        return 'text-typewriter-fast';
+      case 'glow':
+        return 'text-glow';
+      default:
+        return '';
     }
   };
 
@@ -1273,6 +1339,7 @@ function ProductCarouselOverlay({
 
   const renderButton = () => {
     if (!config.showButton) return null;
+    if (config.enableScroll) return null; // Button is rendered in scroll mode differently
 
     const buttonFontStyle = config.buttonFontStyle || 'normal';
     let fontWeight = config.buttonFontWeight || '400';
@@ -1287,13 +1354,15 @@ function ProductCarouselOverlay({
       fontWeight = 'bold';
       fontStyle = 'italic';
     }
+    
+    const textAnimClass = getTextAnimationClass();
 
     return (
       <a
         href={product.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-block px-3 py-1.5 text-sm whitespace-nowrap"
+        className={`inline-block px-3 py-1.5 text-sm whitespace-nowrap ${textAnimClass}`}
         style={{
           backgroundColor: config.buttonBackgroundColor,
           color: config.buttonTextColor,
@@ -1313,7 +1382,66 @@ function ProductCarouselOverlay({
   const renderContent = () => {
     const thumbnailSize = config.thumbnailSize || 64;
     const thumbnailClasses = getThumbnailClasses();
+    const textAnimClass = getTextAnimationClass();
     
+    // Scroll mode: show only one element at a time
+    if (config.enableScroll) {
+      const currentItem = scrollIndex === 0 ? 'title' : scrollIndex === 1 ? 'price' : 'button';
+      
+      return (
+        <>
+          <img
+            src={product.thumbnailUrl}
+            alt={product.title}
+            className={thumbnailClasses}
+            style={{
+              width: config.thumbnailShape === 'portrait' ? `${thumbnailSize * 0.75}px` : `${thumbnailSize}px`,
+              height: `${thumbnailSize}px`,
+              borderRadius: config.thumbnailShape === 'circle' ? '50%' : `${config.cornerRadius}px`,
+            }}
+          />
+          <div className="flex-1 min-w-0 space-y-1">
+            {scrollIndex === 0 && config.showTitle && (
+              <p
+                key="title"
+                className={`text-sm font-semibold line-clamp-1 ${textAnimClass}`}
+                style={{
+                  fontWeight: config.titleFontStyle === 'bold' || config.titleFontStyle === 'bold-italic' ? 'bold' : '600',
+                  fontStyle: config.titleFontStyle === 'italic' || config.titleFontStyle === 'bold-italic' ? 'italic' : 'normal',
+                  fontFamily: getFontFamily(config.titleFontFamily),
+                }}
+              >
+                {product.title}
+              </p>
+            )}
+            {scrollIndex === 1 && config.showPrice && (
+              <p
+                key="price"
+                className={`text-sm font-semibold text-primary ${textAnimClass}`}
+                style={{
+                  fontFamily: getFontFamily(config.priceFontFamily),
+                }}
+              >
+                {product.price}
+              </p>
+            )}
+            {scrollIndex === 2 && config.showButton && (
+              <span
+                key="button-text"
+                className={`text-sm font-semibold ${textAnimClass}`}
+                style={{
+                  fontFamily: getFontFamily(config.buttonFontFamily),
+                }}
+              >
+                {config.buttonText}
+              </span>
+            )}
+          </div>
+        </>
+      );
+    }
+    
+    // Normal mode: show all elements with animation
     return (
       <>
         <img
@@ -1329,7 +1457,7 @@ function ProductCarouselOverlay({
         <div className="flex-1 min-w-0 space-y-1">
           {config.showTitle && (
             <p
-              className="text-sm font-semibold line-clamp-1"
+              className={`text-sm font-semibold line-clamp-1 ${textAnimClass}`}
               style={{
                 fontWeight: config.titleFontStyle === 'bold' || config.titleFontStyle === 'bold-italic' ? 'bold' : '600',
                 fontStyle: config.titleFontStyle === 'italic' || config.titleFontStyle === 'bold-italic' ? 'italic' : 'normal',
@@ -1341,7 +1469,7 @@ function ProductCarouselOverlay({
           )}
           {config.showPrice && (
             <p
-              className="text-sm font-semibold text-primary"
+              className={`text-sm font-semibold text-primary ${textAnimClass}`}
               style={{
                 fontFamily: getFontFamily(config.priceFontFamily),
               }}

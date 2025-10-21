@@ -44,6 +44,53 @@
   animation: fade-in 0.3s ease-out, soft-pulse 2s ease-in-out infinite;
 }
 
+/* Text Animations */
+@keyframes typewriter-slow {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes typewriter-medium {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes typewriter-fast {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    text-shadow: 0 0 4px currentColor, 0 0 8px currentColor;
+  }
+  50% {
+    text-shadow: 0 0 8px currentColor, 0 0 16px currentColor, 0 0 20px currentColor;
+  }
+}
+
+.text-typewriter-slow {
+  overflow: hidden;
+  white-space: nowrap;
+  animation: typewriter-slow 4s steps(240) forwards;
+}
+
+.text-typewriter-medium {
+  overflow: hidden;
+  white-space: nowrap;
+  animation: typewriter-medium 2.5s steps(150) forwards;
+}
+
+.text-typewriter-fast {
+  overflow: hidden;
+  white-space: nowrap;
+  animation: typewriter-fast 1.5s steps(90) forwards;
+}
+
+.text-glow {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
 /* LIGHT MODE */
 :root {
   --button-outline: rgba(0,0,0, .10);

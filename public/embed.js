@@ -55,6 +55,52 @@
       .shoppable-carousel.animation-pulse {
         animation: fade-in 0.3s ease-out, soft-pulse 2s ease-in-out infinite;
       }
+      
+      @keyframes typewriter-slow {
+        from { width: 0; }
+        to { width: 100%; }
+      }
+      
+      @keyframes typewriter-medium {
+        from { width: 0; }
+        to { width: 100%; }
+      }
+      
+      @keyframes typewriter-fast {
+        from { width: 0; }
+        to { width: 100%; }
+      }
+      
+      @keyframes glow-pulse {
+        0%, 100% {
+          text-shadow: 0 0 4px currentColor, 0 0 8px currentColor;
+        }
+        50% {
+          text-shadow: 0 0 8px currentColor, 0 0 16px currentColor, 0 0 20px currentColor;
+        }
+      }
+      
+      .text-typewriter-slow {
+        overflow: hidden;
+        white-space: nowrap;
+        animation: typewriter-slow 4s steps(240) forwards;
+      }
+      
+      .text-typewriter-medium {
+        overflow: hidden;
+        white-space: nowrap;
+        animation: typewriter-medium 2.5s steps(150) forwards;
+      }
+      
+      .text-typewriter-fast {
+        overflow: hidden;
+        white-space: nowrap;
+        animation: typewriter-fast 1.5s steps(90) forwards;
+      }
+      
+      .text-glow {
+        animation: glow-pulse 2s ease-in-out infinite;
+      }
     `;
     document.head.appendChild(style);
   }
@@ -64,6 +110,7 @@
     videoId: null,
     viewTracked: false,
     productCache: new Map(),
+    scrollStates: new Map(), // Track scroll states for each carousel (0=title, 1=price, 2=button)
 
     getFontFamily: function(fontFamily) {
       switch (fontFamily) {
@@ -76,6 +123,53 @@
         default:
           return 'inherit';
       }
+    },
+    
+    getTextAnimationClass: function(textAnimation) {
+      switch (textAnimation) {
+        case 'typewriter-slow':
+          return 'text-typewriter-slow';
+        case 'typewriter-medium':
+          return 'text-typewriter-medium';
+        case 'typewriter-fast':
+          return 'text-typewriter-fast';
+        case 'glow':
+          return 'text-glow';
+        default:
+          return '';
+      }
+    },
+    
+    initScrollState: function(carouselId) {
+      if (!this.scrollStates.has(carouselId)) {
+        this.scrollStates.set(carouselId, { 
+          index: 0, 
+          lastUpdate: Date.now(),
+          intervalId: null
+        });
+        
+        // Set up interval to cycle scroll state
+        // The normal timeupdate event will pick up the state changes and redraw
+        const state = this.scrollStates.get(carouselId);
+        state.intervalId = setInterval(() => {
+          state.index = (state.index + 1) % 3;
+          state.lastUpdate = Date.now();
+        }, 1000);
+      }
+      return this.scrollStates.get(carouselId);
+    },
+    
+    clearScrollState: function(carouselId) {
+      const state = this.scrollStates.get(carouselId);
+      if (state && state.intervalId) {
+        clearInterval(state.intervalId);
+        this.scrollStates.delete(carouselId);
+      }
+    },
+    
+    getScrollIndex: function(carouselId) {
+      const state = this.scrollStates.get(carouselId);
+      return state ? state.index : 0;
     },
 
     init: function(options) {
@@ -166,10 +260,21 @@
         p => currentTime >= p.startTime && currentTime <= p.endTime
       );
 
-      activePlacements.forEach(placement => {
+      // Track active carousel IDs for cleanup
+      const activeCarouselIds = new Set();
+
+      activePlacements.forEach((placement) => {
+        const carouselId = `${video.id}-${placement.productId}-${placement.startTime}`;
+        activeCarouselIds.add(carouselId);
+
         if (this.productCache.has(placement.productId)) {
           const product = this.productCache.get(placement.productId);
-          const carousel = this.createCarousel(product, video.carouselConfig);
+          const carousel = this.createCarousel(product, video.carouselConfig, carouselId);
+          
+          // Apply position styles
+          const positionStyles = this.getPositionStyles(video.carouselConfig.position);
+          Object.assign(carousel.style, positionStyles);
+          
           container.appendChild(carousel);
         } else {
           fetch(`${this.apiUrl}/products/${placement.productId}`)
@@ -179,7 +284,12 @@
             })
             .then(product => {
               this.productCache.set(placement.productId, product);
-              const carousel = this.createCarousel(product, video.carouselConfig);
+              const carousel = this.createCarousel(product, video.carouselConfig, carouselId);
+              
+              // Apply position styles
+              const positionStyles = this.getPositionStyles(video.carouselConfig.position);
+              Object.assign(carousel.style, positionStyles);
+              
               container.appendChild(carousel);
             })
             .catch(err => {
@@ -187,11 +297,20 @@
             });
         }
       });
+
+      // Clean up scroll intervals for inactive carousels
+      const allCarouselIds = Array.from(this.scrollStates.keys());
+      allCarouselIds.forEach(id => {
+        if (!activeCarouselIds.has(id)) {
+          this.clearScrollState(id);
+        }
+      });
     },
 
-    createCarousel: function(product, config) {
+    createCarousel: function(product, config, carouselId) {
       const carousel = document.createElement('div');
       carousel.style.position = 'absolute';
+      carousel.dataset.carouselId = carouselId || 'default';
       
       // Background styling
       if (config.transparentBackground) {
@@ -249,10 +368,25 @@
       info.style.flexDirection = 'column';
       info.style.gap = '4px';
 
-      if (config.showTitle) {
+      // Handle scroll mode
+      const enableScroll = config.enableScroll || false;
+      let scrollIndex = 0;
+      if (enableScroll && carouselId) {
+        this.initScrollState(carouselId);
+        scrollIndex = this.getScrollIndex(carouselId);
+      }
+
+      // Show title (either always or when scrollIndex === 0)
+      if (config.showTitle && (!enableScroll || scrollIndex === 0)) {
         const title = document.createElement('p');
         title.textContent = product.title;
         title.style.fontSize = '14px';
+        
+        // Apply text animation
+        const textAnimClass = this.getTextAnimationClass(config.textAnimation);
+        if (textAnimClass) {
+          title.className = textAnimClass;
+        }
         
         // Apply font styles
         const titleFontStyle = config.titleFontStyle || 'normal';
@@ -277,7 +411,8 @@
         info.appendChild(title);
       }
 
-      if (config.showPrice) {
+      // Show price (either always or when scrollIndex === 1)
+      if (config.showPrice && (!enableScroll || scrollIndex === 1)) {
         const price = document.createElement('p');
         price.textContent = product.price;
         price.style.fontSize = '14px';
@@ -285,7 +420,32 @@
         price.style.margin = '0';
         price.style.color = '#6366f1';
         price.style.fontFamily = this.getFontFamily(config.priceFontFamily);
+        
+        // Apply text animation
+        const textAnimClass = this.getTextAnimationClass(config.textAnimation);
+        if (textAnimClass) {
+          price.className = textAnimClass;
+        }
+        
         info.appendChild(price);
+      }
+      
+      // Show button text in info div when scrolling (scrollIndex === 2)
+      if (enableScroll && scrollIndex === 2 && config.showButton) {
+        const buttonText = document.createElement('span');
+        buttonText.textContent = config.buttonText;
+        buttonText.style.fontSize = '14px';
+        buttonText.style.fontWeight = '600';
+        buttonText.style.color = '#000';
+        buttonText.style.fontFamily = this.getFontFamily(config.buttonFontFamily);
+        
+        // Apply text animation
+        const textAnimClass = this.getTextAnimationClass(config.textAnimation);
+        if (textAnimClass) {
+          buttonText.className = textAnimClass;
+        }
+        
+        info.appendChild(buttonText);
       }
 
       if (config.showDescription && product.description) {
@@ -298,9 +458,9 @@
         info.appendChild(description);
       }
 
-      // Create button if needed
+      // Create button if needed (but not when in scroll mode - button text is shown in info div)
       let button = null;
-      if (config.showButton) {
+      if (config.showButton && !enableScroll) {
         button = document.createElement('a');
         button.href = product.url;
         button.target = '_blank';
@@ -311,6 +471,12 @@
         button.style.backgroundColor = config.buttonBackgroundColor;
         button.style.color = config.buttonTextColor;
         button.style.fontSize = `${config.buttonFontSize}px`;
+        
+        // Apply text animation
+        const textAnimClass = this.getTextAnimationClass(config.textAnimation);
+        if (textAnimClass) {
+          button.className = textAnimClass;
+        }
         
         // Apply font styles
         const buttonFontStyle = config.buttonFontStyle || 'normal';
@@ -414,18 +580,21 @@
         carousel.appendChild(content);
       }
 
-      carousel.style.cursor = config.showButton ? 'default' : 'pointer';
-      
+      // Handle clicks - in scroll mode, entire carousel is clickable
       const trackAndOpen = (productId, url) => {
         this.trackAnalytics('product_click', productId);
         window.open(url, '_blank');
       };
 
-      if (!config.showButton) {
+      if (enableScroll || !config.showButton) {
+        // Scroll mode or no button: make entire carousel clickable
+        carousel.style.cursor = 'pointer';
         carousel.addEventListener('click', () => {
           trackAndOpen(product.id, product.url);
         });
       } else {
+        // Normal mode with button
+        carousel.style.cursor = 'default';
         const button = info.querySelector('a');
         if (button) {
           button.addEventListener('click', (e) => {
