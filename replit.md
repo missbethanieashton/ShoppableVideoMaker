@@ -6,6 +6,12 @@ A professional admin interface for creating interactive shoppable videos with cu
 ## Core Features
 - **Video Library**: Dashboard for managing all shoppable videos
 - **Product Inventory**: Product management system with thumbnails, URLs, titles, and prices
+- **File Upload System**: 
+  - Drag-and-drop file upload for product thumbnails, videos, and video thumbnails
+  - File type validation (images: jpg/png/webp; videos: mp4/webm/mov)
+  - File size limits (10MB for images, 100MB for videos)
+  - Live preview of uploaded files
+  - Error handling with user-friendly messages
 - **Video Editor**: Timeline-based editor for placing products at specific timestamps
 - **Carousel Customization Suite**: 
   - Position selector (9 positions including top-right, top-center, side-right, etc.)
@@ -34,6 +40,7 @@ A professional admin interface for creating interactive shoppable videos with cu
   
 - **Components**:
   - Sidebar navigation (sleek, minimal design)
+  - FileUpload component (reusable drag-and-drop with previews)
   - Video timeline editor with drag-and-drop
   - Product carousel overlay preview
   - Carousel customization panel
@@ -43,7 +50,7 @@ A professional admin interface for creating interactive shoppable videos with cu
   - Products: GET/POST/DELETE `/api/products`
   - Videos: GET/POST/PATCH/DELETE `/api/videos`
   - Video publishing: PATCH `/api/videos/:id/publish`
-  - File upload: POST `/api/upload/video`
+  - File uploads: POST `/api/upload/image`, POST `/api/upload/video`
   - Analytics events: POST `/api/analytics/events`
   - Analytics retrieval: GET `/api/analytics/events`, GET `/api/analytics/summary`
 
@@ -55,6 +62,12 @@ A professional admin interface for creating interactive shoppable videos with cu
 - **AnalyticsEvent**: id, videoId, productId, eventType (view/product_click), timestamp, metadata
 
 ## Recent Changes
+- File Upload System (October 21, 2025)
+  - Replaced URL inputs with drag-and-drop file upload
+  - FileUpload component with preview and error handling
+  - Backend validation for file types and sizes
+  - Files stored in uploads/ directory
+  - Multer configured with separate instances for images/videos
 - Database migration from in-memory to PostgreSQL (October 21, 2025)
   - Neon serverless PostgreSQL with Drizzle ORM
   - Tables: products, videos, analytics_events
