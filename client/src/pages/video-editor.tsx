@@ -1004,8 +1004,27 @@ function ProductCarouselOverlay({ product, config }: { product: Product; config:
     }
   };
 
+  const getAnimationClass = () => {
+    switch (config.animation) {
+      case 'hover':
+        return 'transition-transform hover:scale-105';
+      case 'float':
+        return 'animate-bounce';
+      case 'pulse':
+        return 'animate-pulse';
+      default:
+        return '';
+    }
+  };
+
   return (
-    <div className={`absolute ${getPositionClasses()} bg-card/95 backdrop-blur-sm shadow-lg p-3 max-w-xs`} style={{ borderRadius: `${config.cornerRadius}px` }}>
+    <div 
+      className={`absolute ${getPositionClasses()} p-3 ${getAnimationClass()} ${config.transparentBackground ? 'bg-transparent' : 'bg-card/95 backdrop-blur-sm'} ${config.showBorder ? 'shadow-lg border border-border' : ''}`} 
+      style={{ 
+        borderRadius: `${config.cornerRadius}px`,
+        maxWidth: `${config.carouselWidth || 250}px`
+      }}
+    >
       <div className="flex gap-3">
         <img
           src={product.thumbnailUrl}
