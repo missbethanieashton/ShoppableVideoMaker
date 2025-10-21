@@ -34,15 +34,21 @@ export const carouselPositions = [
 ] as const;
 
 export const thumbnailShapes = ["square", "circle", "portrait"] as const;
+export const carouselAnimations = ["none", "hover", "float", "pulse"] as const;
 
 export type CarouselPosition = typeof carouselPositions[number];
 export type ThumbnailShape = typeof thumbnailShapes[number];
+export type CarouselAnimation = typeof carouselAnimations[number];
 
 export interface CarouselConfig {
   position: CarouselPosition;
   thumbnailShape: ThumbnailShape;
   thumbnailSize: number; // Size in pixels (width/height for square/circle, width for portrait)
+  carouselWidth: number; // Width of entire carousel in pixels (32-250px)
   cornerRadius: number;
+  transparentBackground: boolean;
+  showBorder: boolean;
+  animation: CarouselAnimation;
   showTitle: boolean;
   showPrice: boolean;
   showDescription: boolean;
@@ -87,7 +93,11 @@ export const defaultCarouselConfig: CarouselConfig = {
   position: "top-right",
   thumbnailShape: "square",
   thumbnailSize: 64, // Default 64px thumbnail size
+  carouselWidth: 250, // Default carousel width 250px
   cornerRadius: 0,
+  transparentBackground: false,
+  showBorder: true,
+  animation: "none",
   showTitle: false,
   showPrice: false,
   showDescription: false,
