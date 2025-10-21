@@ -78,6 +78,15 @@ A professional admin interface for creating interactive shoppable videos with cu
 - **AnalyticsEvent**: id, videoId, productId, eventType (view/product_click), timestamp, metadata
 
 ## Recent Changes
+- Embed Code External Website Compatibility Fix (October 21, 2025)
+  - **Critical Fix**: Embed code now works on external websites
+  - **Implementation**: GET /api/videos/:id and /api/products/:id convert relative URLs to absolute URLs
+  - **CORS Configuration**: Explicit CORS headers added to /uploads directory for video file access
+  - **URL Conversion**: All video and product thumbnail URLs are served as absolute URLs (https://...)
+  - **Proxy Support**: Handles x-forwarded-proto and x-forwarded-host headers for proper URL construction
+  - **Important Note**: Videos must use browser-compatible codecs (H.264/AAC for MP4) for playback
+  - Embed code can now be placed on any external website without CORS errors
+  - Video files and product thumbnails load correctly from external domains
 - Product Deletion & Video Preview Sizing (October 21, 2025)
   - **New Feature**: Delete button (trash icon) added to each product card in "All Products" list
   - **Enhancement**: Products can now be deleted directly from list without selecting first
