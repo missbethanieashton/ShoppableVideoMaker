@@ -202,7 +202,11 @@
         carousel.style.border = 'none';
       }
       
-      carousel.style.padding = '12px';
+      const padding = config.carouselPadding || 12;
+      const thumbnailGap = config.thumbnailContentGap || 12;
+      const buttonGap = config.contentButtonGap || 12;
+      
+      carousel.style.padding = `${padding}px`;
       carousel.style.maxWidth = `${config.carouselWidth || 250}px`;
       carousel.style.borderRadius = `${config.cornerRadius}px`;
       carousel.style.pointerEvents = 'auto';
@@ -219,7 +223,7 @@
 
       const content = document.createElement('div');
       content.style.display = 'flex';
-      content.style.gap = '12px';
+      content.style.gap = `${thumbnailGap}px`;
 
       const thumbnail = document.createElement('img');
       thumbnail.src = product.thumbnailUrl;
@@ -330,11 +334,11 @@
         const wrapper = document.createElement('div');
         wrapper.style.display = 'flex';
         wrapper.style.flexDirection = 'column';
-        wrapper.style.gap = '12px';
+        wrapper.style.gap = `${buttonGap}px`;
         
         const contentRow = document.createElement('div');
         contentRow.style.display = 'flex';
-        contentRow.style.gap = '12px';
+        contentRow.style.gap = `${thumbnailGap}px`;
         contentRow.style.alignItems = 'flex-start';
         contentRow.appendChild(thumbnail);
         contentRow.appendChild(info);
@@ -352,12 +356,11 @@
         content.appendChild(info);
         carousel.appendChild(content);
         if (button) {
-          button.style.marginLeft = '8px';
           button.style.alignSelf = 'center';
           const wrapper = document.createElement('div');
           wrapper.style.display = 'flex';
           wrapper.style.alignItems = 'center';
-          wrapper.style.gap = '8px';
+          wrapper.style.gap = `${buttonGap}px`;
           carousel.innerHTML = '';
           wrapper.appendChild(content);
           wrapper.appendChild(button);
@@ -368,12 +371,11 @@
         content.appendChild(thumbnail);
         content.appendChild(info);
         if (button) {
-          button.style.marginRight = '8px';
           button.style.alignSelf = 'center';
           const wrapper = document.createElement('div');
           wrapper.style.display = 'flex';
           wrapper.style.alignItems = 'center';
-          wrapper.style.gap = '8px';
+          wrapper.style.gap = `${buttonGap}px`;
           wrapper.appendChild(button);
           wrapper.appendChild(content);
           carousel.appendChild(wrapper);
@@ -383,7 +385,7 @@
       } else if (buttonPos === 'top') {
         // Button above content
         if (button) {
-          button.style.marginBottom = '8px';
+          button.style.marginBottom = `${buttonGap}px`;
           button.style.display = 'block';
           button.style.width = '100%';
           button.style.textAlign = 'center';
@@ -397,7 +399,7 @@
         content.appendChild(thumbnail);
         content.appendChild(info);
         if (button) {
-          button.style.marginTop = '8px';
+          button.style.marginTop = `${buttonGap}px`;
           info.appendChild(button);
         }
         carousel.appendChild(content);

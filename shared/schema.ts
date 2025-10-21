@@ -71,6 +71,9 @@ export interface CarouselConfig {
   titleFontStyle: FontStyle;
   titleFontFamily: FontFamily;
   priceFontFamily: FontFamily;
+  thumbnailContentGap: number; // Gap between thumbnail and content in pixels (4-24px)
+  contentButtonGap: number; // Gap between content and button in pixels (4-24px)
+  carouselPadding: number; // Inner padding of carousel container (8-24px)
 }
 
 // Product placement schema (products on timeline)
@@ -126,6 +129,9 @@ export const defaultCarouselConfig: CarouselConfig = {
   titleFontStyle: "normal",
   titleFontFamily: "default",
   priceFontFamily: "default",
+  thumbnailContentGap: 12, // Default 12px gap between thumbnail and content
+  contentButtonGap: 12, // Default 12px gap between content and button
+  carouselPadding: 12, // Default 12px inner padding
 };
 
 // Analytics events schema

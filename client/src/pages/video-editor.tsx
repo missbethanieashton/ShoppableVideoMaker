@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useParams, useLocation } from "wouter";
-import { Save, Code, Upload, ArrowLeft, Play, Pause, Plus, X, Copy, Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { Save, Code, Upload, ArrowLeft, Play, Pause, Plus, X, Copy, Trash2, ChevronDown, ChevronUp, Download } from "lucide-react";
+import html2canvas from "html2canvas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -123,6 +124,77 @@ export default function VideoEditor() {
     ));
     if (selectedPlacement?.id === placementId) {
       setSelectedPlacement(prev => prev ? { ...prev, ...updates } : null);
+    }
+  };
+
+  const downloadPreview = async () => {
+    const videoElement = videoRef.current;
+    const videoContainer = document.querySelector('.video-preview-container') as HTMLElement;
+    const carouselOverlay = document.querySelector('.product-carousel-preview') as HTMLElement;
+    
+    if (!videoElement || !videoContainer) {
+      toast({
+        title: "Error",
+        description: "Video not ready",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Step 1: Create canvas and draw the video frame
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Canvas context not available');
+
+      const containerRect = videoContainer.getBoundingClientRect();
+      canvas.width = containerRect.width * 2; // 2x for better quality
+      canvas.height = containerRect.height * 2;
+      
+      // Draw video frame
+      ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+      // Step 2: If there's a carousel overlay, render it on top
+      if (carouselOverlay) {
+        const overlayCanvas = await html2canvas(carouselOverlay, {
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: null,
+          scale: 2,
+          logging: false
+        });
+        
+        // Get overlay position relative to video container
+        const overlayRect = carouselOverlay.getBoundingClientRect();
+        const x = (overlayRect.left - containerRect.left) * 2;
+        const y = (overlayRect.top - containerRect.top) * 2;
+        
+        // Draw overlay canvas on top of video frame
+        ctx.drawImage(overlayCanvas, x, y);
+      }
+
+      // Step 3: Download the combined image
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${videoTitle || 'video'}-preview-${Date.now()}.png`;
+        link.click();
+        URL.revokeObjectURL(url);
+        
+        toast({
+          title: "Preview Downloaded",
+          description: "Video preview with carousel has been saved",
+        });
+      }, 'image/png');
+    } catch (error) {
+      console.error('Error capturing preview:', error);
+      toast({
+        title: "Error",
+        description: "Failed to capture preview",
+        variant: "destructive"
+      });
     }
   };
 
@@ -311,6 +383,15 @@ export default function VideoEditor() {
         <div className="flex items-center gap-2">
           <Button 
             variant="outline" 
+            onClick={downloadPreview} 
+            disabled={!videoFile || productPlacements.length === 0} 
+            data-testid="button-download-preview"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Download Preview
+          </Button>
+          <Button 
+            variant="outline" 
             onClick={() => saveMutation.mutate()} 
             disabled={!videoFile || !videoTitle || saveMutation.isPending} 
             data-testid="button-save"
@@ -393,7 +474,7 @@ export default function VideoEditor() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="relative w-[160px]">
+              <div className="relative w-[160px] video-preview-container">
                 <video
                   ref={videoRef}
                   src={videoFile}
@@ -613,6 +694,61 @@ export default function VideoEditor() {
                       }
                       data-testid="slider-corner-radius"
                     />
+                  </div>
+
+                  <div className="space-y-4">
+                    <h3 className="font-semibold">Spacing & Padding</h3>
+                    
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <Label className="text-sm">Carousel Padding</Label>
+                        <span className="text-sm text-muted-foreground">{carouselConfig.carouselPadding || 12}px</span>
+                      </div>
+                      <Slider
+                        value={[carouselConfig.carouselPadding || 12]}
+                        min={4}
+                        max={24}
+                        step={2}
+                        onValueChange={([value]) =>
+                          setCarouselConfig({ ...carouselConfig, carouselPadding: value })
+                        }
+                        data-testid="slider-carousel-padding"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <Label className="text-sm">Thumbnail-Content Gap</Label>
+                        <span className="text-sm text-muted-foreground">{carouselConfig.thumbnailContentGap || 12}px</span>
+                      </div>
+                      <Slider
+                        value={[carouselConfig.thumbnailContentGap || 12]}
+                        min={4}
+                        max={24}
+                        step={2}
+                        onValueChange={([value]) =>
+                          setCarouselConfig({ ...carouselConfig, thumbnailContentGap: value })
+                        }
+                        data-testid="slider-thumbnail-content-gap"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <Label className="text-sm">Content-Button Gap</Label>
+                        <span className="text-sm text-muted-foreground">{carouselConfig.contentButtonGap || 12}px</span>
+                      </div>
+                      <Slider
+                        value={[carouselConfig.contentButtonGap || 12]}
+                        min={4}
+                        max={24}
+                        step={2}
+                        onValueChange={([value]) =>
+                          setCarouselConfig({ ...carouselConfig, contentButtonGap: value })
+                        }
+                        data-testid="slider-content-button-gap"
+                      />
+                    </div>
                   </div>
 
                   <div className="space-y-4">
@@ -1271,25 +1407,30 @@ function ProductCarouselOverlay({ product, config }: { product: Product; config:
     );
   };
 
+  const padding = config.carouselPadding || 12;
+  const thumbnailGap = config.thumbnailContentGap || 12;
+  const buttonGap = config.contentButtonGap || 12;
+
   return (
     <div 
-      className={`absolute ${getPositionClasses()} p-3 ${getAnimationClass()} ${config.transparentBackground ? 'bg-transparent' : 'bg-card/95 backdrop-blur-sm'} ${config.showBorder ? 'shadow-lg border border-border' : ''}`} 
+      className={`absolute ${getPositionClasses()} ${getAnimationClass()} ${config.transparentBackground ? 'bg-transparent' : 'bg-card/95 backdrop-blur-sm'} ${config.showBorder ? 'shadow-lg border border-border' : ''}`} 
       style={{ 
         borderRadius: `${config.cornerRadius}px`,
-        maxWidth: `${config.carouselWidth || 250}px`
+        maxWidth: `${config.carouselWidth || 250}px`,
+        padding: `${padding}px`
       }}
     >
       {buttonPos === 'top' && (
-        <div className="mb-3 w-full">
+        <div style={{ marginBottom: `${buttonGap}px`, width: '100%' }}>
           {renderButton()}
         </div>
       )}
-      <div className={`flex gap-3 ${buttonPos === 'left' || buttonPos === 'right' ? 'items-center' : 'flex-col'}`}>
+      <div className="flex" style={{ gap: `${thumbnailGap}px`, flexDirection: buttonPos === 'left' || buttonPos === 'right' ? 'row' : 'column', alignItems: buttonPos === 'left' || buttonPos === 'right' ? 'center' : 'stretch' }}>
         {buttonPos === 'left' && <div className="flex-shrink-0">{renderButton()}</div>}
-        <div className={`flex gap-3 ${buttonPos === 'below' ? 'flex-col' : 'items-center'}`}>
+        <div className="flex" style={{ gap: `${thumbnailGap}px`, flexDirection: buttonPos === 'below' ? 'column' : 'row', alignItems: buttonPos === 'below' ? 'stretch' : 'center' }}>
           {renderContent()}
           {buttonPos === 'below' && (
-            <div className="w-full mt-1">
+            <div style={{ width: '100%', marginTop: `${buttonGap}px` }}>
               {renderButton()}
             </div>
           )}
