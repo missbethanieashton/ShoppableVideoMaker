@@ -78,6 +78,17 @@ A professional admin interface for creating interactive shoppable videos with cu
 - **AnalyticsEvent**: id, videoId, productId, eventType (view/product_click), timestamp, metadata
 
 ## Recent Changes
+- Spacing Controls & Download Preview (October 21, 2025)
+  - **New Feature**: Three configurable spacing controls with sliders (4-24px each):
+    - Carousel Padding: Inner padding of carousel container (default 12px)
+    - Thumbnail-Content Gap: Space between product thumbnail and text content (default 12px)
+    - Content-Button Gap: Space between content and button (default 12px)
+  - **New Feature**: Download Preview button to capture video frame with carousel overlay as PNG
+    - Hybrid capture: Video frame + html2canvas overlay composite
+    - High-quality export (2x scale)
+    - Works with all button positions and carousel configurations
+  - All spacing controls work in both editor preview and external embeds
+  - Backward compatible: Existing videos automatically get default spacing values
 - Typography & Button Positioning Improvements (October 21, 2025)
   - **New Feature**: Font family options for button text, title, and price (League Spartan, Glacial Indifference, Lacquer)
   - **Bug Fix**: Button positioning now works correctly - "Below" position places button below entire content (not next to text)
