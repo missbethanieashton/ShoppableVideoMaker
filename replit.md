@@ -78,6 +78,18 @@ A professional admin interface for creating interactive shoppable videos with cu
 - **AnalyticsEvent**: id, videoId, productId, eventType (view/product_click), timestamp, metadata
 
 ## Recent Changes
+- Product Deletion & Video Preview Sizing (October 21, 2025)
+  - **New Feature**: Delete button (trash icon) added to each product card in "All Products" list
+  - **Enhancement**: Products can now be deleted directly from list without selecting first
+  - **UI Improvement**: Video preview container reduced from 384px to 320px (~16.7% reduction)
+  - **Enhancement**: Delete button uses event.stopPropagation() to prevent unintended selection
+  - Better page fit with smaller video preview - less scrolling required in editor
+  - Both delete methods work correctly: list delete and selected placement delete
+- Embed Code Fix (October 21, 2025)
+  - **Critical Bug Fix**: Fixed embed code showing "undefined" for video IDs
+  - saveMutation now properly parses JSON response to get actual Video object with ID
+  - Embed code displays correct video IDs in all three locations (div id, containerId, videoId)
+  - Copy to clipboard now copies valid, functional embed code
 - Advanced Carousel Customization & UI Improvements (October 21, 2025)
   - **New Feature**: Carousel width control (32-250px slider, default 250px)
   - **New Feature**: Transparent background toggle for overlay-style carousels
@@ -87,7 +99,6 @@ A professional admin interface for creating interactive shoppable videos with cu
     - Hover (scale up on hover)
     - Float (gentle up/down movement)
     - Pulse (breathing effect)
-  - **UI Improvement**: Reduced video preview container by 60% for better workspace layout
   - **Bug Fix**: Fixed embed code to work on external websites with CORS headers
   - **Enhancement**: Embed code now displays immediately after save with copy button
   - All new carousel options work in both editor preview and embed player
