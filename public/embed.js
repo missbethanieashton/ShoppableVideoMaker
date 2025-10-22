@@ -367,6 +367,17 @@
         ? Math.max(carouselWidth, thumbnailSize + (padding * 2) + thumbnailGap + 100)
         : Math.max(carouselWidth, thumbnailSize + (padding * 2));
       
+      console.log('[ShoppableVideo Debug]', {
+        carouselWidth,
+        thumbnailSize,
+        padding,
+        thumbnailGap,
+        hasContent,
+        calculated: thumbnailSize + (padding * 2) + thumbnailGap + 100,
+        minCarouselWidth,
+        finalWidth: `min(95%, ${minCarouselWidth}px)`
+      });
+      
       carousel.style.padding = `${padding}px`;
       carousel.style.width = `min(95%, ${minCarouselWidth}px)`;
       carousel.style.borderRadius = `${config.cornerRadius}px`;
