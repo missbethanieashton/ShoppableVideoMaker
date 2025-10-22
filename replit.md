@@ -37,6 +37,20 @@ The architecture is schema-first, ensuring data consistency. The application use
 - **Google Fonts / CDN Fonts**: Used for custom font families in carousel typography.
 
 ## Recent Changes
+- **Fixed Carousel Sizing in Embed Player** (October 22, 2025)
+  - Removed `min(95%, ...)` width constraint that was shrinking carousel
+  - Applied absolute sizing: carousel now renders at exact configured width
+  - Added `maxWidth: 'none'` to prevent parent CSS overrides
+  - Added `minWidth` to ensure carousel never shrinks below configured size
+  - Synced editor preview and embed player to use identical sizing logic
+  - Carousel now displays at full configured size (250px) instead of microscopic size
+
+- **Fixed Flashing Carousel Bug** (October 22, 2025)
+  - Implemented carousel DOM element caching to prevent recreation on every frame
+  - Added `carouselCache` Map to persist carousel elements by placement ID
+  - Only create/remove carousels when placements actually change (not on every timeupdate event)
+  - Eliminated DOM thrashing that caused flashing and micro-sizing issues
+
 - **Auto-Refreshing Embed Code** (October 22, 2025)
   - Embed code now automatically refreshes after every save click
   - Embed code section auto-expands to show updated code

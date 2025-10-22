@@ -108,6 +108,7 @@
   window.ShoppableVideo = {
     apiUrl: null,
     videoId: null,
+    currentVideoId: null, // Track current video to clear cache on video change
     viewTracked: false,
     productCache: new Map(),
     carouselCache: new Map(), // Cache carousel DOM elements by ID
@@ -179,6 +180,11 @@
       this.videoId = videoId;
       this.viewTracked = false;
       this.productCache = new Map();
+      
+      // Clear carousel cache on init to ensure fresh config is applied
+      this.carouselCache.clear();
+      this.currentVideoId = null;
+      
       const container = document.getElementById(containerId);
       
       if (!container) {
@@ -255,14 +261,24 @@
     },
 
     updateCarousel: function(container, video, currentTime) {
+      // Clear carousel cache if video has changed
+      if (this.currentVideoId !== video.id) {
+        this.carouselCache.clear();
+        this.currentVideoId = video.id;
+      }
+
       const activePlacements = video.productPlacements.filter(
         p => currentTime >= p.startTime && currentTime <= p.endTime
       );
 
-      // Track active carousel IDs
+      // Create config hash to detect ANY config changes
+      // Hash entire config so any field change invalidates cache
+      const configHash = JSON.stringify(video.carouselConfig);
+
+      // Track active carousel IDs (include config hash)
       const activeCarouselIds = new Set();
       activePlacements.forEach(placement => {
-        const carouselId = `${video.id}-${placement.productId}-${placement.startTime}`;
+        const carouselId = `${video.id}-${placement.productId}-${placement.startTime}-${configHash}`;
         activeCarouselIds.add(carouselId);
       });
 
@@ -281,9 +297,9 @@
 
       // Add or reuse carousels for active placements
       activePlacements.forEach((placement) => {
-        const carouselId = `${video.id}-${placement.productId}-${placement.startTime}`;
+        const carouselId = `${video.id}-${placement.productId}-${placement.startTime}-${configHash}`;
 
-        // If carousel already exists and is in DOM, skip
+        // If carousel already exists and is in DOM, skip (config is baked into cache key)
         if (this.carouselCache.has(carouselId)) {
           return;
         }
@@ -367,19 +383,10 @@
         ? Math.max(carouselWidth, thumbnailSize + (padding * 2) + thumbnailGap + 100)
         : Math.max(carouselWidth, thumbnailSize + (padding * 2));
       
-      console.log('[ShoppableVideo Debug]', {
-        carouselWidth,
-        thumbnailSize,
-        padding,
-        thumbnailGap,
-        hasContent,
-        calculated: thumbnailSize + (padding * 2) + thumbnailGap + 100,
-        minCarouselWidth,
-        finalWidth: `min(95%, ${minCarouselWidth}px)`
-      });
-      
       carousel.style.padding = `${padding}px`;
-      carousel.style.width = `min(95%, ${minCarouselWidth}px)`;
+      carousel.style.width = `${minCarouselWidth}px`;
+      carousel.style.maxWidth = 'none';
+      carousel.style.minWidth = `${minCarouselWidth}px`;
       carousel.style.borderRadius = `${config.cornerRadius}px`;
       carousel.style.pointerEvents = 'auto';
       carousel.style.zIndex = '1000';
@@ -645,7 +652,10 @@
       } else if (buttonPos === 'top') {
         // Button above content
         if (button) {
-          button.style.marginBottom = `${buttonGap}px`;
+          // Apply margin for spacing (supports negative values for overlap)
+          if (buttonGap !== 0) {
+            button.style.marginBottom = `${buttonGap}px`;
+          }
           button.style.display = 'block';
           button.style.width = '100%';
           button.style.textAlign = 'center';

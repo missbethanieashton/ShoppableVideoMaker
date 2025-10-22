@@ -1573,7 +1573,9 @@ function ProductCarouselOverlay({
       style={{ 
         ...getPositionStyles(),
         borderRadius: `${config.cornerRadius}px`,
-        width: `min(95%, ${minCarouselWidth}px)`,
+        width: `${minCarouselWidth}px`,
+        maxWidth: 'none',
+        minWidth: `${minCarouselWidth}px`,
         padding: `${padding}px`
       }}
     >
