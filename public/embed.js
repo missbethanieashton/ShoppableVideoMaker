@@ -110,6 +110,7 @@
     videoId: null,
     viewTracked: false,
     productCache: new Map(),
+    carouselCache: new Map(), // Cache carousel DOM elements by ID
     scrollStates: new Map(), // Track scroll states for each carousel (0=title, 1=price, 2=button)
 
     getFontFamily: function(fontFamily) {
@@ -254,19 +255,40 @@
     },
 
     updateCarousel: function(container, video, currentTime) {
-      container.innerHTML = '';
-      
       const activePlacements = video.productPlacements.filter(
         p => currentTime >= p.startTime && currentTime <= p.endTime
       );
 
-      // Track active carousel IDs for cleanup
+      // Track active carousel IDs
       const activeCarouselIds = new Set();
-
-      activePlacements.forEach((placement) => {
+      activePlacements.forEach(placement => {
         const carouselId = `${video.id}-${placement.productId}-${placement.startTime}`;
         activeCarouselIds.add(carouselId);
+      });
 
+      // Remove carousels that are no longer active
+      const cachedCarouselIds = Array.from(this.carouselCache.keys());
+      cachedCarouselIds.forEach(carouselId => {
+        if (!activeCarouselIds.has(carouselId)) {
+          const carousel = this.carouselCache.get(carouselId);
+          if (carousel && carousel.parentNode) {
+            carousel.parentNode.removeChild(carousel);
+          }
+          this.carouselCache.delete(carouselId);
+          this.clearScrollState(carouselId);
+        }
+      });
+
+      // Add or reuse carousels for active placements
+      activePlacements.forEach((placement) => {
+        const carouselId = `${video.id}-${placement.productId}-${placement.startTime}`;
+
+        // If carousel already exists and is in DOM, skip
+        if (this.carouselCache.has(carouselId)) {
+          return;
+        }
+
+        // Create new carousel
         if (this.productCache.has(placement.productId)) {
           const product = this.productCache.get(placement.productId);
           const carousel = this.createCarousel(product, video.carouselConfig, carouselId);
@@ -275,8 +297,10 @@
           const positionStyles = this.getPositionStyles(video.carouselConfig.position);
           Object.assign(carousel.style, positionStyles);
           
+          this.carouselCache.set(carouselId, carousel);
           container.appendChild(carousel);
         } else {
+          // Fetch product data
           fetch(`${this.apiUrl}/products/${placement.productId}`)
             .then(res => {
               if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -284,25 +308,22 @@
             })
             .then(product => {
               this.productCache.set(placement.productId, product);
-              const carousel = this.createCarousel(product, video.carouselConfig, carouselId);
               
-              // Apply position styles
-              const positionStyles = this.getPositionStyles(video.carouselConfig.position);
-              Object.assign(carousel.style, positionStyles);
-              
-              container.appendChild(carousel);
+              // Only create carousel if placement is still active
+              if (activeCarouselIds.has(carouselId) && !this.carouselCache.has(carouselId)) {
+                const carousel = this.createCarousel(product, video.carouselConfig, carouselId);
+                
+                // Apply position styles
+                const positionStyles = this.getPositionStyles(video.carouselConfig.position);
+                Object.assign(carousel.style, positionStyles);
+                
+                this.carouselCache.set(carouselId, carousel);
+                container.appendChild(carousel);
+              }
             })
             .catch(err => {
               console.error('Failed to load product:', err);
             });
-        }
-      });
-
-      // Clean up scroll intervals for inactive carousels
-      const allCarouselIds = Array.from(this.scrollStates.keys());
-      allCarouselIds.forEach(id => {
-        if (!activeCarouselIds.has(id)) {
-          this.clearScrollState(id);
         }
       });
     },
@@ -363,7 +384,10 @@
 
       const content = document.createElement('div');
       content.style.display = 'flex';
-      content.style.gap = `${thumbnailGap}px`;
+      // Use gap for positive values, margin for negative (overlap)
+      if (thumbnailGap >= 0) {
+        content.style.gap = `${thumbnailGap}px`;
+      }
 
       const thumbnail = document.createElement('img');
       thumbnail.src = product.thumbnailUrl;
@@ -386,6 +410,11 @@
       info.style.display = 'flex';
       info.style.flexDirection = 'column';
       info.style.gap = '4px';
+      
+      // Apply negative margin for overlap effect
+      if (thumbnailGap < 0) {
+        info.style.marginLeft = `${thumbnailGap}px`;
+      }
 
       // Handle scroll mode
       const enableScroll = config.enableScroll || false;
@@ -533,11 +562,16 @@
         const wrapper = document.createElement('div');
         wrapper.style.display = 'flex';
         wrapper.style.flexDirection = 'column';
-        wrapper.style.gap = `${buttonGap}px`;
+        if (buttonGap >= 0) {
+          wrapper.style.gap = `${buttonGap}px`;
+        }
         
         const contentRow = document.createElement('div');
         contentRow.style.display = 'flex';
-        contentRow.style.gap = `${thumbnailGap}px`;
+        // Use gap for positive values only
+        if (thumbnailGap >= 0) {
+          contentRow.style.gap = `${thumbnailGap}px`;
+        }
         contentRow.style.alignItems = 'flex-start';
         contentRow.appendChild(thumbnail);
         contentRow.appendChild(info);
@@ -546,6 +580,10 @@
         if (button) {
           button.style.width = '100%';
           button.style.textAlign = 'center';
+          // Apply negative margin for overlap effect
+          if (buttonGap < 0) {
+            button.style.marginTop = `${buttonGap}px`;
+          }
           wrapper.appendChild(button);
         }
         carousel.appendChild(wrapper);
@@ -559,9 +597,15 @@
           const wrapper = document.createElement('div');
           wrapper.style.display = 'flex';
           wrapper.style.alignItems = 'center';
-          wrapper.style.gap = `${buttonGap}px`;
+          if (buttonGap >= 0) {
+            wrapper.style.gap = `${buttonGap}px`;
+          }
           carousel.innerHTML = '';
           wrapper.appendChild(content);
+          // Apply negative margin for overlap effect
+          if (buttonGap < 0) {
+            button.style.marginLeft = `${buttonGap}px`;
+          }
           wrapper.appendChild(button);
           carousel.appendChild(wrapper);
         }
@@ -574,8 +618,14 @@
           const wrapper = document.createElement('div');
           wrapper.style.display = 'flex';
           wrapper.style.alignItems = 'center';
-          wrapper.style.gap = `${buttonGap}px`;
+          if (buttonGap >= 0) {
+            wrapper.style.gap = `${buttonGap}px`;
+          }
           wrapper.appendChild(button);
+          // Apply negative margin for overlap effect
+          if (buttonGap < 0) {
+            content.style.marginLeft = `${buttonGap}px`;
+          }
           wrapper.appendChild(content);
           carousel.appendChild(wrapper);
         } else {

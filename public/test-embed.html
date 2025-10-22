@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Embed Test</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #f0f0f0;
+      font-family: system-ui, sans-serif;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Shoppable Video Embed Test</h1>
+  <div id="shoppable-video-cfce48b8-f718-4aff-84dc-86622bd2899a"></div>
+  <script src="/embed.js"></script>
+  <script>
+    ShoppableVideo.init({
+      containerId: 'shoppable-video-cfce48b8-f718-4aff-84dc-86622bd2899a',
+      videoId: 'cfce48b8-f718-4aff-84dc-86622bd2899a',
+      apiUrl: 'http://localhost:5000/api'
+    });
+  </script>
+</body>
+</html>
