@@ -37,6 +37,14 @@ The architecture is schema-first, ensuring data consistency. The application use
 - **Google Fonts / CDN Fonts**: Used for custom font families in carousel typography.
 
 ## Recent Changes
+- **Added Delete Video Functionality** (October 22, 2025)
+  - Delete button with Trash icon added to each video card in Video Library
+  - Confirmation dialog prevents accidental deletions
+  - Success/error toast notifications for user feedback
+  - Automatic cache invalidation refreshes video list after deletion
+  - DELETE endpoint already existed in backend, connected to UI
+  - E2E tested: confirmation flow, API integration, UI updates
+
 - **Fixed Responsive Carousel Sizing in Embed Player** (October 22, 2025)
   - **ROOT CAUSE**: Carousel used fixed pixel width (250px) while video could be any size
   - On large videos (1000px+), 250px carousel appeared microscopic and unusable

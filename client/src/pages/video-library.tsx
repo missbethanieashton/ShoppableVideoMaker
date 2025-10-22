@@ -1,22 +1,47 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Plus, Play, Code, Trash2, Video as VideoIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Video } from "@shared/schema";
 
 export default function VideoLibrary() {
   const [embedDialogOpen, setEmbedDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const { toast } = useToast();
 
   const { data: videos, isLoading } = useQuery<Video[]>({
     queryKey: ["/api/videos"],
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (videoId: string) => {
+      await apiRequest("DELETE", `/api/videos/${videoId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/videos"] });
+      toast({
+        title: "Video deleted",
+        description: "The video has been removed successfully.",
+      });
+      setDeleteDialogOpen(false);
+      setSelectedVideo(null);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete video. Please try again.",
+        variant: "destructive",
+      });
+    },
   });
 
   const handleCopyEmbed = (video: Video) => {
@@ -44,6 +69,17 @@ export default function VideoLibrary() {
   const showEmbedDialog = (video: Video) => {
     setSelectedVideo(video);
     setEmbedDialogOpen(true);
+  };
+
+  const showDeleteDialog = (video: Video) => {
+    setSelectedVideo(video);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDelete = () => {
+    if (selectedVideo) {
+      deleteMutation.mutate(selectedVideo.id);
+    }
   };
 
   if (isLoading) {
@@ -136,6 +172,14 @@ export default function VideoLibrary() {
                         <Code className="w-3 h-3" />
                       </Button>
                     )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => showDeleteDialog(video)}
+                      data-testid={`button-delete-${video.id}`}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -172,6 +216,29 @@ export default function VideoLibrary() {
           )}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Video</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{selectedVideo?.title}"? This action cannot be undone.
+              All product placements and analytics data will also be removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-delete">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleteMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              data-testid="button-confirm-delete"
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete Video"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
