@@ -330,9 +330,9 @@
         carousel.style.border = 'none';
       }
       
-      const padding = config.carouselPadding || 12;
-      const thumbnailGap = config.thumbnailContentGap || 12;
-      const buttonGap = config.contentButtonGap || 12;
+      const padding = config.carouselPadding ?? 12;
+      const thumbnailGap = config.thumbnailContentPadding ?? config.thumbnailContentGap ?? 12;
+      const buttonGap = config.contentButtonGap ?? 12;
       const thumbnailSize = config.thumbnailSize || 64;
       const carouselWidth = config.carouselWidth || 250;
       

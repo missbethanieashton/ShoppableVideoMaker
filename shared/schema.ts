@@ -78,9 +78,9 @@ export interface CarouselConfig {
   titleColor: string;
   priceFontFamily: FontFamily;
   priceColor: string;
-  thumbnailContentGap: number; // Gap between thumbnail and content in pixels (4-24px)
-  contentButtonGap: number; // Gap between content and button in pixels (4-24px)
-  carouselPadding: number; // Inner padding of carousel container (8-24px)
+  thumbnailContentPadding: number; // Padding between thumbnail and content in pixels (supports negative for overlap, e.g., -15px)
+  contentButtonGap: number; // Gap between content and button in pixels (supports negative for overlap)
+  carouselPadding: number; // Inner padding of carousel container (supports negative values)
   textAnimation: TextAnimation; // Animation for title, price, and button text
   enableScroll: boolean; // Enable scrolling between title, price, and button text
 }
@@ -141,7 +141,7 @@ export const defaultCarouselConfig: CarouselConfig = {
   titleColor: "#000000",
   priceFontFamily: "default",
   priceColor: "#6366f1",
-  thumbnailContentGap: 12, // Default 12px gap between thumbnail and content
+  thumbnailContentPadding: 12, // Default 12px padding between thumbnail and content
   contentButtonGap: 12, // Default 12px gap between content and button
   carouselPadding: 12, // Default 12px inner padding
   textAnimation: "none", // Default no text animation

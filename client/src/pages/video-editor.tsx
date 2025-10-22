@@ -712,54 +712,54 @@ export default function VideoEditor() {
                     <h3 className="font-semibold">Spacing & Padding</h3>
                     
                     <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <Label className="text-sm">Carousel Padding</Label>
-                        <span className="text-sm text-muted-foreground">{carouselConfig.carouselPadding || 12}px</span>
-                      </div>
-                      <Slider
-                        value={[carouselConfig.carouselPadding || 12]}
-                        min={4}
-                        max={24}
-                        step={2}
-                        onValueChange={([value]) =>
-                          setCarouselConfig({ ...carouselConfig, carouselPadding: value })
-                        }
-                        data-testid="slider-carousel-padding"
+                      <Label className="text-sm">Carousel Padding</Label>
+                      <Input
+                        type="number"
+                        value={carouselConfig.carouselPadding ?? 12}
+                        onChange={(e) => {
+                          const value = e.target.valueAsNumber;
+                          if (!isNaN(value)) {
+                            setCarouselConfig({ ...carouselConfig, carouselPadding: Math.round(value) });
+                          }
+                        }}
+                        data-testid="input-carousel-padding"
+                        className="mt-2"
                       />
+                      <p className="text-xs text-muted-foreground mt-1">Supports negative values</p>
                     </div>
 
                     <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <Label className="text-sm">Thumbnail-Content Gap</Label>
-                        <span className="text-sm text-muted-foreground">{carouselConfig.thumbnailContentGap || 12}px</span>
-                      </div>
-                      <Slider
-                        value={[carouselConfig.thumbnailContentGap || 12]}
-                        min={4}
-                        max={24}
-                        step={2}
-                        onValueChange={([value]) =>
-                          setCarouselConfig({ ...carouselConfig, thumbnailContentGap: value })
-                        }
-                        data-testid="slider-thumbnail-content-gap"
+                      <Label className="text-sm">Thumbnail-Content Padding</Label>
+                      <Input
+                        type="number"
+                        value={carouselConfig.thumbnailContentPadding ?? 12}
+                        onChange={(e) => {
+                          const value = e.target.valueAsNumber;
+                          if (!isNaN(value)) {
+                            setCarouselConfig({ ...carouselConfig, thumbnailContentPadding: Math.round(value) });
+                          }
+                        }}
+                        data-testid="input-thumbnail-content-padding"
+                        className="mt-2"
                       />
+                      <p className="text-xs text-muted-foreground mt-1">Supports negative values for overlap (e.g., -15px)</p>
                     </div>
 
                     <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <Label className="text-sm">Content-Button Gap</Label>
-                        <span className="text-sm text-muted-foreground">{carouselConfig.contentButtonGap || 12}px</span>
-                      </div>
-                      <Slider
-                        value={[carouselConfig.contentButtonGap || 12]}
-                        min={4}
-                        max={24}
-                        step={2}
-                        onValueChange={([value]) =>
-                          setCarouselConfig({ ...carouselConfig, contentButtonGap: value })
-                        }
-                        data-testid="slider-content-button-gap"
+                      <Label className="text-sm">Content-Button Gap</Label>
+                      <Input
+                        type="number"
+                        value={carouselConfig.contentButtonGap ?? 12}
+                        onChange={(e) => {
+                          const value = e.target.valueAsNumber;
+                          if (!isNaN(value)) {
+                            setCarouselConfig({ ...carouselConfig, contentButtonGap: Math.round(value) });
+                          }
+                        }}
+                        data-testid="input-content-button-gap"
+                        className="mt-2"
                       />
+                      <p className="text-xs text-muted-foreground mt-1">Supports negative values for overlap</p>
                     </div>
                   </div>
 
@@ -1542,7 +1542,7 @@ function ProductCarouselOverlay({
   };
 
   const padding = config.carouselPadding || 12;
-  const thumbnailGap = config.thumbnailContentGap || 12;
+  const thumbnailGap = config.thumbnailContentPadding ?? 12;
   const buttonGap = config.contentButtonGap || 12;
   const thumbnailSize = config.thumbnailSize || 64;
   const carouselWidth = config.carouselWidth || 250;

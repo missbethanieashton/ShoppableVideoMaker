@@ -1,202 +1,7 @@
 # Shoppable Video Platform
 
 ## Overview
-A professional admin interface for creating interactive shoppable videos with customizable product carousels. Users can upload videos, place products at specific timestamps, customize the product carousel appearance, and generate embeddable code for any website.
-
-## Core Features
-- **Video Library**: Dashboard for managing all shoppable videos
-- **Product Inventory**: Product management system with thumbnails, URLs, titles, and prices
-- **File Upload System**: 
-  - Drag-and-drop file upload for product thumbnails, videos, and video thumbnails
-  - File type validation (images: jpg/png/webp; videos: mp4/webm/mov)
-  - File size limits (10MB for images, 100MB for videos)
-  - Live preview of uploaded files
-  - Error handling with user-friendly messages
-- **Video Editor**: 
-  - Timeline-based editor for placing products at specific timestamps
-  - Drag-and-drop product placements to adjust timing
-  - Resizable placements with left/right edge handles
-  - Real-time preview of carousel overlay on video
-  - Visual timeline with product thumbnails
-  - Minimum 1-second placement duration enforced
-- **Carousel Customization Suite**: 
-  - Position selector (9 positions including top-right, top-center, side-right, etc.)
-  - Thumbnail shape options (square, circle, portrait)
-  - Thumbnail size slider (32-128px, default 64px)
-  - Carousel width control (32-250px, default 250px)
-  - Corner radius control (0-24px)
-  - Transparent background toggle (default: off)
-  - Show border toggle (default: on)
-  - Animation selector (None, Hover, Float, Pulse - default: None)
-  - Content visibility toggles (title, price, description, button)
-  - Button styling (text, colors, font size, font weight, border radius)
-- **Embed Code Generator**: 
-  - Generates JavaScript embed code after publishing
-  - Shows embed code in publish dialog
-  - One-click copy to clipboard functionality
-  - Embed code includes video player initialization script
-- **Embeddable Player**: Standalone player with interactive product carousels
-- **Analytics Dashboard**: 
-  - Real-time tracking of video views and product clicks
-  - Click-through rate (CTR) calculation
-  - Top performing products analysis
-  - Filter analytics by individual video or all videos
-  - Automatic event tracking in embed player
-
-## Architecture
-
-### Frontend (React + TypeScript)
-- **Pages**:
-  - `/` - Video Library (dashboard)
-  - `/products` - Product Inventory
-  - `/editor/:id` - Video Editor
-  - `/analytics` - Analytics Dashboard
-  - `/settings` - Application settings
-  
-- **Components**:
-  - Sidebar navigation (sleek, minimal design)
-  - FileUpload component (reusable drag-and-drop with previews)
-  - Interactive timeline with draggable/resizable product placements
-  - Product carousel overlay preview
-  - Carousel customization panel
-  - Publish dialog with embed code display
-
-### Backend (Express + PostgreSQL)
-- **API Endpoints**:
-  - Products: GET/POST/DELETE `/api/products`
-  - Videos: GET/POST/PATCH/DELETE `/api/videos`
-  - Video publishing: PATCH `/api/videos/:id/publish`
-  - File uploads: POST `/api/upload/image`, POST `/api/upload/video`
-  - Analytics events: POST `/api/analytics/events`
-  - Analytics retrieval: GET `/api/analytics/events`, GET `/api/analytics/summary`
-
-### Data Models
-- **Product**: id, title, price, description, url, thumbnailUrl
-- **Video**: id, title, videoUrl, duration, thumbnailUrl, published, carouselConfig, productPlacements
-- **ProductPlacement**: id, productId, startTime, endTime
-- **CarouselConfig**: position, thumbnailShape, thumbnailSize, carouselWidth, cornerRadius, transparentBackground, showBorder, animation, visibility flags, button styling (including buttonBorderRadius)
-- **AnalyticsEvent**: id, videoId, productId, eventType (view/product_click), timestamp, metadata
-
-## Recent Changes
-- Button Layering Implementation (October 22, 2025)
-  - **New Feature**: Button layering control for z-index stacking order between button and thumbnail
-  - **UI Control**: "Button Layer" dropdown in carousel customization panel with "Forward" and "Backward" options
-  - **Default**: "Forward" (button z-index=10, thumbnail z-index=1, button appears on top)
-  - **Backward Mode**: Button z-index=1, thumbnail z-index=10 (thumbnail appears on top)
-  - **Use Case**: Enables modern overlay designs for vertical videos where button can sit behind thumbnail
-  - **Implementation**: Z-index applied to both button and thumbnail elements in editor preview and embed player
-  - **Schema**: Added buttonLayer field to CarouselConfig with ButtonLayer type ("forward" | "backward")
-  - **Files Modified**: shared/schema.ts, client/src/pages/video-editor.tsx, public/embed.js
-  - **Backend**: API correctly saves and retrieves buttonLayer configuration
-  - **Testing**: Verified via curl that PATCH/GET endpoints correctly persist buttonLayer values
-- Carousel Sizing Fix for Embed Player (October 22, 2025)
-  - **Critical Bug Fix**: Fixed thumbnail shrinking in embedded player when thumbnailSize > carouselWidth
-  - **Implementation**: Added intelligent carousel width calculation in both editor preview and embed.js
-  - **Logic**: Carousel automatically expands to `Math.max(carouselWidth, thumbnailSize + padding*2 + gap + 100px)`
-  - **Technical Details**:
-    - Added `flexShrink: '0'` to thumbnail images to prevent shrinking
-    - Carousel now accommodates large thumbnails (up to 250px) while maintaining config carouselWidth as minimum
-    - Ensures at least 100px space for text content alongside thumbnail
-  - **Feature Parity**: Both editor preview and embed player use identical sizing logic
-  - Fixes reported issue where 250px thumbnail displayed 20x smaller in embed due to 160px carousel width constraint
-- Title and Price Color Customization (October 22, 2025)
-  - **New Feature**: Added color picker controls for Title Color and Price Color
-  - **Schema Updates**: Added titleColor (default #000000) and priceColor (default #6366f1) to CarouselConfig
-  - **Consistency**: All three text elements (title, price, button) now have complete styling options:
-    - Title: Font Family, Font Style, Color
-    - Price: Font Family, Color  
-    - Button: Font Family, Font Style, Font Weight, Text Color
-  - **Editor UI**: Native color picker inputs appear when respective toggles are enabled
-  - **Embed Player**: Colors applied correctly in both scroll mode and normal mode
-  - **Backward Compatibility**: API routes merge defaultCarouselConfig with stored config for existing videos
-- Spacing Controls & Download Preview (October 21, 2025)
-  - **New Feature**: Three configurable spacing controls with sliders (4-24px each):
-    - Carousel Padding: Inner padding of carousel container (default 12px)
-    - Thumbnail-Content Gap: Space between product thumbnail and text content (default 12px)
-    - Content-Button Gap: Space between content and button (default 12px)
-  - **New Feature**: Download Preview button to capture video frame with carousel overlay as PNG
-    - Hybrid capture: Video frame + html2canvas overlay composite
-    - High-quality export (2x scale)
-    - Works with all button positions and carousel configurations
-  - All spacing controls work in both editor preview and external embeds
-  - Backward compatible: Existing videos automatically get default spacing values
-- Typography & Button Positioning Improvements (October 21, 2025)
-  - **New Feature**: Font family options for button text, title, and price (League Spartan, Glacial Indifference, Lacquer)
-  - **Bug Fix**: Button positioning now works correctly - "Below" position places button below entire content (not next to text)
-  - **Enhancement**: Adjusted padding between button and product thumbnail (increased from 8px to 12px)
-  - **Enhancement**: Button now has proper whitespace-nowrap to prevent text wrapping
-  - **UI Improvement**: Video preview container reduced to 160px (50% smaller) for better page fit
-  - **New Feature**: Collapsible embed code section with toggle button (starts collapsed to save space)
-  - All typography changes work in both editor preview and embed player
-  - Font families loaded via Google Fonts and CDN Fonts
-- Embed Code External Website Compatibility Fix (October 21, 2025)
-  - **Critical Fix**: Embed code now works on external websites
-  - **Implementation**: GET /api/videos/:id and /api/products/:id convert relative URLs to absolute URLs
-  - **CORS Configuration**: Explicit CORS headers added to /uploads directory for video file access
-  - **URL Conversion**: All video and product thumbnail URLs are served as absolute URLs (https://...)
-  - **Proxy Support**: Handles x-forwarded-proto and x-forwarded-host headers for proper URL construction
-  - **Important Note**: Videos must use browser-compatible codecs (H.264/AAC for MP4) for playback
-  - Embed code can now be placed on any external website without CORS errors
-  - Video files and product thumbnails load correctly from external domains
-- Product Deletion & Video Preview Sizing (October 21, 2025)
-  - **New Feature**: Delete button (trash icon) added to each product card in "All Products" list
-  - **Enhancement**: Products can now be deleted directly from list without selecting first
-  - **UI Improvement**: Video preview container reduced from 384px to 320px (~16.7% reduction)
-  - **Enhancement**: Delete button uses event.stopPropagation() to prevent unintended selection
-  - Better page fit with smaller video preview - less scrolling required in editor
-  - Both delete methods work correctly: list delete and selected placement delete
-- Embed Code Fix (October 21, 2025)
-  - **Critical Bug Fix**: Fixed embed code showing "undefined" for video IDs
-  - saveMutation now properly parses JSON response to get actual Video object with ID
-  - Embed code displays correct video IDs in all three locations (div id, containerId, videoId)
-  - Copy to clipboard now copies valid, functional embed code
-- Advanced Carousel Customization & UI Improvements (October 21, 2025)
-  - **New Feature**: Carousel width control (32-250px slider, default 250px)
-  - **New Feature**: Transparent background toggle for overlay-style carousels
-  - **New Feature**: Show border toggle to remove/show carousel borders
-  - **New Feature**: Animation selector with 4 options:
-    - None (default)
-    - Hover (scale up on hover)
-    - Float (gentle up/down movement)
-    - Pulse (breathing effect)
-  - **Bug Fix**: Fixed embed code to work on external websites with CORS headers
-  - **Enhancement**: Embed code now displays immediately after save with copy button
-  - All new carousel options work in both editor preview and embed player
-- Carousel Styling Bug Fixes & Enhancements (October 21, 2025)
-  - **Critical Bug Fix**: Added NaN validation to number inputs (buttonFontSize, buttonBorderRadius, thumbnailSize) to prevent app crashes when inputs are cleared
-  - **New Feature**: Thumbnail size slider (32-128px, step 4px, default 64px) with real-time preview
-  - **New Feature**: Button border radius control added to UI (was in schema but missing from interface)
-  - **Bug Fix**: Fixed query cache invalidation - save now properly refreshes UI with latest backend data
-  - **Bug Fix**: Carousel config now merges with defaults on load, ensuring backward compatibility for videos created before new fields were added
-  - Dynamic thumbnail sizing applies to all shapes (square, circle, portrait) in both editor preview and embed player
-  - Database migration: All existing videos updated with thumbnailSize field (default 64px)
-- Video Editor Enhancements (October 21, 2025)
-  - Draggable product placements on timeline with smooth cursor tracking
-  - Resizable placements via edge handles (minimum 1 second duration)
-  - Selected placement syncs with sidebar for live timing updates
-  - Publish dialog shows embed code with copy-to-clipboard
-  - Visual feedback for drag/resize operations (cursor changes, selection ring)
-- File Upload System (October 21, 2025)
-  - Replaced URL inputs with drag-and-drop file upload
-  - FileUpload component with preview and error handling
-  - Backend validation for file types and sizes
-  - Files stored in uploads/ directory
-  - Multer configured with separate instances for images/videos
-- Database migration from in-memory to PostgreSQL (October 21, 2025)
-  - Neon serverless PostgreSQL with Drizzle ORM
-  - Tables: products, videos, analytics_events
-  - Persistent storage with auto-generated UUIDs
-- Analytics Dashboard implementation (October 21, 2025)
-  - Real-time event tracking in embed player
-  - Video views and product click tracking
-  - CTR calculation and top products analysis
-  - Filter by individual video or all videos
-- Initial MVP implementation (October 21, 2025)
-  - Complete schema-first architecture
-  - All frontend components with professional design
-  - Timeline-based video editor
-  - Carousel customization suite
-  - Embed code generation system
+A professional admin interface designed for creating interactive shoppable videos. The platform allows users to upload videos, strategically place products at specific timestamps within the video, extensively customize the appearance of product carousels, and generate embeddable code for seamless integration into any website. The core purpose is to transform passive video content into engaging, direct-to-purchase experiences.
 
 ## User Preferences
 - No authentication required (single-user admin interface)
@@ -204,29 +9,29 @@ A professional admin interface for creating interactive shoppable videos with cu
 - Sleek, minimal sidebar (14rem width)
 - Professional, productivity-focused design system
 
-## Technical Stack
-- React 18 with TypeScript
-- Wouter for routing
-- TanStack Query for data fetching
-- Shadcn UI components
-- Tailwind CSS for styling
-- Express.js backend
-- PostgreSQL database (Neon serverless)
-- Drizzle ORM for type-safe database operations
-- Multer for file uploads
+## System Architecture
 
-## Default Carousel Configuration
-- Position: Top Right
-- Thumbnail Shape: Square
-- Thumbnail Size: 64px
-- Carousel Width: 250px
-- Corner Radius: 0px
-- Transparent Background: Off
-- Show Border: On
-- Animation: None
-- Show Title: No
-- Show Price: No
-- Show Description: No
-- Show Button: No
-- Button Border Radius: 4px
-- Only thumbnails visible by default
+### UI/UX Decisions
+The platform features a professional, productivity-focused design. The admin interface is built with React and TypeScript, leveraging Shadcn UI components and Tailwind CSS for a sleek and minimal aesthetic. Key UI elements include a compact sidebar navigation, a reusable drag-and-drop file upload component with previews, an interactive timeline for video editing, and a comprehensive carousel customization panel. The design prioritizes clear visual feedback, especially during drag-and-drop operations and real-time preview of carousel overlays.
+
+### Technical Implementations
+The frontend is built with React 18 and TypeScript, using Wouter for routing and TanStack Query for data fetching. The backend is an Express.js application connected to a PostgreSQL database (Neon serverless) via Drizzle ORM for type-safe operations. Multer handles file uploads.
+
+### Feature Specifications
+- **Video Library**: Dashboard for managing all shoppable videos.
+- **Product Inventory**: System for managing product details (thumbnails, URLs, titles, prices).
+- **File Upload System**: Drag-and-drop functionality for images and videos with validation, live previews, and error handling.
+- **Video Editor**: Timeline-based editor enabling product placement at specific timestamps, with draggable/resizable placements (minimum 1-second duration) and real-time carousel overlay preview.
+- **Carousel Customization Suite**: Extensive controls for carousel appearance, including position, thumbnail shape/size, width, corner radius, background transparency, border visibility, animation effects (None, Hover, Float, Pulse), and content visibility toggles (title, price, description, button). Button styling (text, colors, font size, font weight, border radius, layering) and precise spacing controls (carousel padding, thumbnail-content padding, content-button gap) are included, with support for negative values for overlap effects.
+- **Embed Code Generator**: Produces JavaScript embed code with one-click copy functionality after publishing.
+- **Embeddable Player**: Standalone player capable of rendering interactive product carousels configured by the admin interface.
+- **Analytics Dashboard**: Tracks video views and product clicks in real-time, calculates CTR, and analyzes top-performing products, with filtering capabilities.
+
+### System Design Choices
+The architecture is schema-first, ensuring data consistency. The application uses a robust API for managing products, videos, uploads, publishing, and analytics events. Carousel configurations are stored persistently, with backward compatibility mechanisms for new fields. All URLs for video files and product thumbnails are converted to absolute URLs for external website compatibility, and CORS headers are explicitly configured for uploaded assets.
+
+## External Dependencies
+- **PostgreSQL**: Primary database for persistent storage (using Neon serverless).
+- **Drizzle ORM**: Type-safe database interaction layer.
+- **Multer**: Middleware for handling multipart/form-data, primarily for file uploads.
+- **Google Fonts / CDN Fonts**: Used for custom font families in carousel typography.
