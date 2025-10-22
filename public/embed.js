@@ -357,6 +357,7 @@
       thumbnail.src = product.thumbnailUrl;
       thumbnail.alt = product.title;
       thumbnail.style.objectFit = 'cover';
+      thumbnail.style.flexShrink = '0';
       
       const thumbnailStyles = this.getThumbnailStyles(config);
       Object.assign(thumbnail.style, thumbnailStyles);
