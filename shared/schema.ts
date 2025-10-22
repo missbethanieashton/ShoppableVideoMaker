@@ -72,7 +72,9 @@ export interface CarouselConfig {
   buttonPosition: ButtonPosition;
   titleFontStyle: FontStyle;
   titleFontFamily: FontFamily;
+  titleColor: string;
   priceFontFamily: FontFamily;
+  priceColor: string;
   thumbnailContentGap: number; // Gap between thumbnail and content in pixels (4-24px)
   contentButtonGap: number; // Gap between content and button in pixels (4-24px)
   carouselPadding: number; // Inner padding of carousel container (8-24px)
@@ -132,7 +134,9 @@ export const defaultCarouselConfig: CarouselConfig = {
   buttonPosition: "below",
   titleFontStyle: "normal",
   titleFontFamily: "default",
+  titleColor: "#000000",
   priceFontFamily: "default",
+  priceColor: "#6366f1",
   thumbnailContentGap: 12, // Default 12px gap between thumbnail and content
   contentButtonGap: 12, // Default 12px gap between content and button
   carouselPadding: 12, // Default 12px inner padding

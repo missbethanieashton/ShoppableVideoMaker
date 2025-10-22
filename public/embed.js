@@ -407,7 +407,7 @@
         title.style.fontFamily = this.getFontFamily(config.titleFontFamily);
         title.style.margin = '0';
         title.style.lineHeight = '1.4';
-        title.style.color = '#000';
+        title.style.color = config.titleColor || '#000';
         info.appendChild(title);
       }
 
@@ -418,7 +418,7 @@
         price.style.fontSize = '14px';
         price.style.fontWeight = '600';
         price.style.margin = '0';
-        price.style.color = '#6366f1';
+        price.style.color = config.priceColor || '#6366f1';
         price.style.fontFamily = this.getFontFamily(config.priceFontFamily);
         
         // Apply text animation

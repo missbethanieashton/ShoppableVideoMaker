@@ -4,7 +4,7 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 import { storage } from "./storage";
-import { insertProductSchema, insertVideoSchema, insertAnalyticsEventSchema } from "@shared/schema";
+import { insertProductSchema, insertVideoSchema, insertAnalyticsEventSchema, defaultCarouselConfig } from "@shared/schema";
 import { z } from "zod";
 
 const imageFileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
@@ -118,7 +118,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/videos", async (req, res) => {
     try {
       const videos = await storage.getVideos();
-      res.json(videos);
+      // Merge carousel config with defaults for backward compatibility
+      const videosWithDefaults = videos.map(video => ({
+        ...video,
+        carouselConfig: { ...defaultCarouselConfig, ...video.carouselConfig }
+      }));
+      res.json(videosWithDefaults);
     } catch (error) {
       console.error("Error fetching videos:", error);
       res.status(500).json({ error: "Failed to fetch videos" });
@@ -132,17 +137,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Video not found" });
       }
       
+      // Merge carousel config with defaults for backward compatibility
+      const videoWithDefaults = {
+        ...video,
+        carouselConfig: { ...defaultCarouselConfig, ...video.carouselConfig }
+      };
+      
       // Convert relative URLs to absolute URLs for embed compatibility
       const protocol = req.headers['x-forwarded-proto'] || req.protocol;
       const host = req.headers['x-forwarded-host'] || req.get('host');
       const baseUrl = `${protocol}://${host}`;
       
       const absoluteVideo = {
-        ...video,
-        videoUrl: video.videoUrl.startsWith('http') ? video.videoUrl : `${baseUrl}${video.videoUrl}`,
-        thumbnailUrl: video.thumbnailUrl && !video.thumbnailUrl.startsWith('http') 
-          ? `${baseUrl}${video.thumbnailUrl}` 
-          : video.thumbnailUrl
+        ...videoWithDefaults,
+        videoUrl: videoWithDefaults.videoUrl.startsWith('http') ? videoWithDefaults.videoUrl : `${baseUrl}${videoWithDefaults.videoUrl}`,
+        thumbnailUrl: videoWithDefaults.thumbnailUrl && !videoWithDefaults.thumbnailUrl.startsWith('http') 
+          ? `${baseUrl}${videoWithDefaults.thumbnailUrl}` 
+          : videoWithDefaults.thumbnailUrl
       };
       
       res.json(absoluteVideo);

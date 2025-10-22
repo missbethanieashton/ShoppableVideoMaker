@@ -904,6 +904,17 @@ export default function VideoEditor() {
                               </SelectContent>
                             </Select>
                           </div>
+                          <div>
+                            <Label>Title Color</Label>
+                            <Input
+                              type="color"
+                              value={carouselConfig.titleColor || "#000000"}
+                              onChange={(e) =>
+                                setCarouselConfig({ ...carouselConfig, titleColor: e.target.value })
+                              }
+                              data-testid="input-title-color"
+                            />
+                          </div>
                         </>
                       )}
                       <div className="flex items-center justify-between">
@@ -918,25 +929,38 @@ export default function VideoEditor() {
                         />
                       </div>
                       {carouselConfig.showPrice && (
-                        <div>
-                          <Label>Price Font Family</Label>
-                          <Select
-                            value={carouselConfig.priceFontFamily || "default"}
-                            onValueChange={(value: FontFamily) =>
-                              setCarouselConfig({ ...carouselConfig, priceFontFamily: value })
-                            }
-                          >
-                            <SelectTrigger data-testid="select-price-font-family">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="default">Default</SelectItem>
-                              <SelectItem value="league-spartan">League Spartan</SelectItem>
-                              <SelectItem value="glacial-indifference">Glacial Indifference</SelectItem>
-                              <SelectItem value="lacquer">Lacquer</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
+                        <>
+                          <div>
+                            <Label>Price Font Family</Label>
+                            <Select
+                              value={carouselConfig.priceFontFamily || "default"}
+                              onValueChange={(value: FontFamily) =>
+                                setCarouselConfig({ ...carouselConfig, priceFontFamily: value })
+                              }
+                            >
+                              <SelectTrigger data-testid="select-price-font-family">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="default">Default</SelectItem>
+                                <SelectItem value="league-spartan">League Spartan</SelectItem>
+                                <SelectItem value="glacial-indifference">Glacial Indifference</SelectItem>
+                                <SelectItem value="lacquer">Lacquer</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label>Price Color</Label>
+                            <Input
+                              type="color"
+                              value={carouselConfig.priceColor || "#6366f1"}
+                              onChange={(e) =>
+                                setCarouselConfig({ ...carouselConfig, priceColor: e.target.value })
+                              }
+                              data-testid="input-price-color"
+                            />
+                          </div>
+                        </>
                       )}
                       <div className="flex items-center justify-between">
                         <Label htmlFor="show-description">Show Description</Label>
@@ -1409,6 +1433,7 @@ function ProductCarouselOverlay({
                   fontWeight: config.titleFontStyle === 'bold' || config.titleFontStyle === 'bold-italic' ? 'bold' : '600',
                   fontStyle: config.titleFontStyle === 'italic' || config.titleFontStyle === 'bold-italic' ? 'italic' : 'normal',
                   fontFamily: getFontFamily(config.titleFontFamily),
+                  color: config.titleColor || '#000000',
                 }}
               >
                 {product.title}
@@ -1417,9 +1442,10 @@ function ProductCarouselOverlay({
             {scrollIndex === 1 && config.showPrice && (
               <p
                 key="price"
-                className={`text-sm font-semibold text-primary ${textAnimClass}`}
+                className={`text-sm font-semibold ${textAnimClass}`}
                 style={{
                   fontFamily: getFontFamily(config.priceFontFamily),
+                  color: config.priceColor || '#6366f1',
                 }}
               >
                 {product.price}
@@ -1462,6 +1488,7 @@ function ProductCarouselOverlay({
                 fontWeight: config.titleFontStyle === 'bold' || config.titleFontStyle === 'bold-italic' ? 'bold' : '600',
                 fontStyle: config.titleFontStyle === 'italic' || config.titleFontStyle === 'bold-italic' ? 'italic' : 'normal',
                 fontFamily: getFontFamily(config.titleFontFamily),
+                color: config.titleColor || '#000000',
               }}
             >
               {product.title}
@@ -1469,9 +1496,10 @@ function ProductCarouselOverlay({
           )}
           {config.showPrice && (
             <p
-              className={`text-sm font-semibold text-primary ${textAnimClass}`}
+              className={`text-sm font-semibold ${textAnimClass}`}
               style={{
                 fontFamily: getFontFamily(config.priceFontFamily),
+                color: config.priceColor || '#6366f1',
               }}
             >
               {product.price}
