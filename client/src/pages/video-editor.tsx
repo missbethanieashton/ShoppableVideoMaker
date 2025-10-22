@@ -1516,6 +1516,18 @@ function ProductCarouselOverlay({
   const padding = config.carouselPadding || 12;
   const thumbnailGap = config.thumbnailContentGap || 12;
   const buttonGap = config.contentButtonGap || 12;
+  const thumbnailSize = config.thumbnailSize || 64;
+  const carouselWidth = config.carouselWidth || 250;
+  
+  // Check if any content is displayed
+  const hasContent = config.showTitle || config.showPrice || config.showDescription || config.showButton;
+  
+  // Calculate minimum carousel width based on content visibility
+  // If content is shown, add gap + minimum content width (100px)
+  // If no content, just ensure carousel fits thumbnail + padding
+  const minCarouselWidth = hasContent 
+    ? Math.max(carouselWidth, thumbnailSize + (padding * 2) + thumbnailGap + 100)
+    : Math.max(carouselWidth, thumbnailSize + (padding * 2));
 
   return (
     <div 
@@ -1523,7 +1535,7 @@ function ProductCarouselOverlay({
       style={{ 
         ...getPositionStyles(),
         borderRadius: `${config.cornerRadius}px`,
-        maxWidth: `${config.carouselWidth || 250}px`,
+        maxWidth: `${minCarouselWidth}px`,
         padding: `${padding}px`
       }}
     >

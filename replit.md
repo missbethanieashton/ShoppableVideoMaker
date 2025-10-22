@@ -78,6 +78,26 @@ A professional admin interface for creating interactive shoppable videos with cu
 - **AnalyticsEvent**: id, videoId, productId, eventType (view/product_click), timestamp, metadata
 
 ## Recent Changes
+- Carousel Sizing Fix for Embed Player (October 22, 2025)
+  - **Critical Bug Fix**: Fixed thumbnail shrinking in embedded player when thumbnailSize > carouselWidth
+  - **Implementation**: Added intelligent carousel width calculation in both editor preview and embed.js
+  - **Logic**: Carousel automatically expands to `Math.max(carouselWidth, thumbnailSize + padding*2 + gap + 100px)`
+  - **Technical Details**:
+    - Added `flexShrink: '0'` to thumbnail images to prevent shrinking
+    - Carousel now accommodates large thumbnails (up to 250px) while maintaining config carouselWidth as minimum
+    - Ensures at least 100px space for text content alongside thumbnail
+  - **Feature Parity**: Both editor preview and embed player use identical sizing logic
+  - Fixes reported issue where 250px thumbnail displayed 20x smaller in embed due to 160px carousel width constraint
+- Title and Price Color Customization (October 22, 2025)
+  - **New Feature**: Added color picker controls for Title Color and Price Color
+  - **Schema Updates**: Added titleColor (default #000000) and priceColor (default #6366f1) to CarouselConfig
+  - **Consistency**: All three text elements (title, price, button) now have complete styling options:
+    - Title: Font Family, Font Style, Color
+    - Price: Font Family, Color  
+    - Button: Font Family, Font Style, Font Weight, Text Color
+  - **Editor UI**: Native color picker inputs appear when respective toggles are enabled
+  - **Embed Player**: Colors applied correctly in both scroll mode and normal mode
+  - **Backward Compatibility**: API routes merge defaultCarouselConfig with stored config for existing videos
 - Spacing Controls & Download Preview (October 21, 2025)
   - **New Feature**: Three configurable spacing controls with sliders (4-24px each):
     - Carousel Padding: Inner padding of carousel container (default 12px)

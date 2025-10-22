@@ -333,9 +333,21 @@
       const padding = config.carouselPadding || 12;
       const thumbnailGap = config.thumbnailContentGap || 12;
       const buttonGap = config.contentButtonGap || 12;
+      const thumbnailSize = config.thumbnailSize || 64;
+      const carouselWidth = config.carouselWidth || 250;
+      
+      // Check if any content is displayed
+      const hasContent = config.showTitle || config.showPrice || config.showDescription || config.showButton;
+      
+      // Calculate minimum carousel width based on content visibility
+      // If content is shown, add gap + minimum content width (100px)
+      // If no content, just ensure carousel fits thumbnail + padding
+      const minCarouselWidth = hasContent 
+        ? Math.max(carouselWidth, thumbnailSize + (padding * 2) + thumbnailGap + 100)
+        : Math.max(carouselWidth, thumbnailSize + (padding * 2));
       
       carousel.style.padding = `${padding}px`;
-      carousel.style.maxWidth = `${config.carouselWidth || 250}px`;
+      carousel.style.maxWidth = `${minCarouselWidth}px`;
       carousel.style.borderRadius = `${config.cornerRadius}px`;
       carousel.style.pointerEvents = 'auto';
       carousel.style.zIndex = '1000';
