@@ -1282,6 +1282,72 @@ export default function VideoEditor() {
           </Tabs>
         </div>
       </div>
+
+      <Dialog open={addProductDialogOpen} onOpenChange={setAddProductDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Product at {formatTime(currentTime)}</DialogTitle>
+            <DialogDescription>
+              Select a product to display at the current timestamp
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="max-h-[60vh]">
+            <div className="grid gap-3 py-4">
+              {products?.map((product) => (
+                <Card
+                  key={product.id}
+                  className="cursor-pointer hover-elevate"
+                  onClick={() => addProductPlacement(product.id)}
+                  data-testid={`card-select-product-${product.id}`}
+                >
+                  <CardContent className="p-4 flex items-center gap-4">
+                    <img
+                      src={product.thumbnailUrl}
+                      alt={product.title}
+                      className="w-16 h-16 object-cover rounded"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium truncate">{product.title}</h4>
+                      <p className="text-sm text-muted-foreground">{product.price}</p>
+                      {product.description && (
+                        <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                          {product.description}
+                        </p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={publishDialogOpen} onOpenChange={setPublishDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Video Published Successfully!</DialogTitle>
+            <DialogDescription>
+              Your shoppable video is now live. Copy the embed code below to add it to your website.
+            </DialogDescription>
+          </DialogHeader>
+          {publishedVideo && (
+            <div className="space-y-4">
+              <div className="p-3 bg-muted rounded-md font-mono text-xs overflow-x-auto">
+                {generateEmbedCode(publishedVideo)}
+              </div>
+              <Button
+                onClick={handleCopyEmbed}
+                className="w-full"
+                data-testid="button-copy-publish-embed"
+              >
+                <Copy className="w-4 h-4 mr-2" />
+                Copy Embed Code
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

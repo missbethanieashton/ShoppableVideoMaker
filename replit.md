@@ -37,6 +37,18 @@ The architecture is schema-first, ensuring data consistency. The application use
 - **Google Fonts / CDN Fonts**: Used for custom font families in carousel typography.
 
 ## Recent Changes
+- **Fixed Missing Add Product Dialog** (October 22, 2025)
+  - Add Product and Publish dialogs were missing from JSX return statement
+  - Dialog components now properly rendered, making "Add Product" button functional
+  - Both dialogs include proper styling, scroll areas, and user feedback
+
+- **Complete Config-Aware Cache System** (October 22, 2025)
+  - Cache key now includes full `JSON.stringify(carouselConfig)` hash
+  - ANY configuration change (width, padding, colors, visibility, borders, etc.) invalidates carousel cache
+  - Prevents stale styling while maintaining performance during playback
+  - Config changes automatically create fresh DOM elements with updated styling
+
+## Previous Changes
 - **Fixed Carousel Sizing in Embed Player** (October 22, 2025)
   - Removed `min(95%, ...)` width constraint that was shrinking carousel
   - Applied absolute sizing: carousel now renders at exact configured width
