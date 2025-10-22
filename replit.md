@@ -78,6 +78,17 @@ A professional admin interface for creating interactive shoppable videos with cu
 - **AnalyticsEvent**: id, videoId, productId, eventType (view/product_click), timestamp, metadata
 
 ## Recent Changes
+- Button Layering Implementation (October 22, 2025)
+  - **New Feature**: Button layering control for z-index stacking order between button and thumbnail
+  - **UI Control**: "Button Layer" dropdown in carousel customization panel with "Forward" and "Backward" options
+  - **Default**: "Forward" (button z-index=10, thumbnail z-index=1, button appears on top)
+  - **Backward Mode**: Button z-index=1, thumbnail z-index=10 (thumbnail appears on top)
+  - **Use Case**: Enables modern overlay designs for vertical videos where button can sit behind thumbnail
+  - **Implementation**: Z-index applied to both button and thumbnail elements in editor preview and embed player
+  - **Schema**: Added buttonLayer field to CarouselConfig with ButtonLayer type ("forward" | "backward")
+  - **Files Modified**: shared/schema.ts, client/src/pages/video-editor.tsx, public/embed.js
+  - **Backend**: API correctly saves and retrieves buttonLayer configuration
+  - **Testing**: Verified via curl that PATCH/GET endpoints correctly persist buttonLayer values
 - Carousel Sizing Fix for Embed Player (October 22, 2025)
   - **Critical Bug Fix**: Fixed thumbnail shrinking in embedded player when thumbnailSize > carouselWidth
   - **Implementation**: Added intelligent carousel width calculation in both editor preview and embed.js

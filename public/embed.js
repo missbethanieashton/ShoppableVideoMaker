@@ -347,7 +347,7 @@
         : Math.max(carouselWidth, thumbnailSize + (padding * 2));
       
       carousel.style.padding = `${padding}px`;
-      carousel.style.maxWidth = `${minCarouselWidth}px`;
+      carousel.style.width = `min(95%, ${minCarouselWidth}px)`;
       carousel.style.borderRadius = `${config.cornerRadius}px`;
       carousel.style.pointerEvents = 'auto';
       carousel.style.zIndex = '1000';
@@ -369,7 +369,13 @@
       thumbnail.src = product.thumbnailUrl;
       thumbnail.alt = product.title;
       thumbnail.style.objectFit = 'cover';
-      thumbnail.style.flexShrink = '0';
+      thumbnail.style.flexShrink = '1';
+      thumbnail.style.minWidth = '0';
+      thumbnail.style.position = 'relative';
+      
+      // Button layer styling: forward = button on top (z-index 10), backward = thumbnail on top (z-index 10)
+      const buttonLayer = config.buttonLayer || 'forward';
+      thumbnail.style.zIndex = buttonLayer === 'forward' ? '1' : '10';
       
       const thumbnailStyles = this.getThumbnailStyles(config);
       Object.assign(thumbnail.style, thumbnailStyles);
@@ -513,6 +519,11 @@
         button.style.cursor = 'pointer';
         button.style.border = 'none';
         button.style.whiteSpace = 'nowrap';
+        button.style.position = 'relative';
+        
+        // Button layer styling: forward = z-index 10, backward = z-index 1
+        const buttonLayer = config.buttonLayer || 'forward';
+        button.style.zIndex = buttonLayer === 'forward' ? '10' : '1';
       }
 
       // Layout based on button position

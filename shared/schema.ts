@@ -36,6 +36,7 @@ export const carouselPositions = [
 export const thumbnailShapes = ["square", "circle", "portrait"] as const;
 export const carouselAnimations = ["none", "hover", "float", "pulse"] as const;
 export const buttonPositions = ["below", "right", "left", "top"] as const;
+export const buttonLayers = ["forward", "backward"] as const;
 export const fontStyles = ["normal", "italic", "bold", "bold-italic"] as const;
 export const fontFamilies = ["default", "league-spartan", "glacial-indifference", "lacquer"] as const;
 export const textAnimations = ["none", "typewriter-slow", "typewriter-medium", "typewriter-fast", "glow"] as const;
@@ -44,6 +45,7 @@ export type CarouselPosition = typeof carouselPositions[number];
 export type ThumbnailShape = typeof thumbnailShapes[number];
 export type CarouselAnimation = typeof carouselAnimations[number];
 export type ButtonPosition = typeof buttonPositions[number];
+export type ButtonLayer = typeof buttonLayers[number];
 export type FontStyle = typeof fontStyles[number];
 export type FontFamily = typeof fontFamilies[number];
 export type TextAnimation = typeof textAnimations[number];
@@ -70,6 +72,7 @@ export interface CarouselConfig {
   buttonFontFamily: FontFamily;
   buttonBorderRadius: number;
   buttonPosition: ButtonPosition;
+  buttonLayer: ButtonLayer;
   titleFontStyle: FontStyle;
   titleFontFamily: FontFamily;
   titleColor: string;
@@ -132,6 +135,7 @@ export const defaultCarouselConfig: CarouselConfig = {
   buttonFontFamily: "default",
   buttonBorderRadius: 4,
   buttonPosition: "below",
+  buttonLayer: "forward",
   titleFontStyle: "normal",
   titleFontFamily: "default",
   titleColor: "#000000",

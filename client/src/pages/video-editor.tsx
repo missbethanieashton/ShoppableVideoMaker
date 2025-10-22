@@ -18,8 +18,8 @@ import { FileUpload } from "@/components/ui/file-upload";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { Video, Product, InsertVideo, ProductPlacement, CarouselConfig, CarouselPosition, ThumbnailShape, CarouselAnimation, ButtonPosition, FontStyle, FontFamily, TextAnimation } from "@shared/schema";
-import { defaultCarouselConfig, carouselPositions, thumbnailShapes, carouselAnimations, buttonPositions, fontStyles, fontFamilies } from "@shared/schema";
+import type { Video, Product, InsertVideo, ProductPlacement, CarouselConfig, CarouselPosition, ThumbnailShape, CarouselAnimation, ButtonPosition, ButtonLayer, FontStyle, FontFamily, TextAnimation } from "@shared/schema";
+import { defaultCarouselConfig, carouselPositions, thumbnailShapes, carouselAnimations, buttonPositions, buttonLayers, fontStyles, fontFamilies } from "@shared/schema";
 
 export default function VideoEditor() {
   const params = useParams();
@@ -1116,6 +1116,26 @@ export default function VideoEditor() {
                           </Select>
                         </div>
                         <div>
+                          <Label>Button Layer</Label>
+                          <Select
+                            value={carouselConfig.buttonLayer}
+                            onValueChange={(value: ButtonLayer) =>
+                              setCarouselConfig({ ...carouselConfig, buttonLayer: value })
+                            }
+                          >
+                            <SelectTrigger data-testid="select-button-layer">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {buttonLayers.map((layer) => (
+                                <SelectItem key={layer} value={layer}>
+                                  {layer.charAt(0).toUpperCase() + layer.slice(1)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
                           <Label>Border Radius</Label>
                           <Input
                             type="number"
@@ -1380,6 +1400,7 @@ function ProductCarouselOverlay({
     }
     
     const textAnimClass = getTextAnimationClass();
+    const buttonZIndex = config.buttonLayer === 'forward' ? 10 : 1;
 
     return (
       <a
@@ -1396,6 +1417,8 @@ function ProductCarouselOverlay({
           fontFamily: getFontFamily(config.buttonFontFamily),
           borderRadius: `${config.buttonBorderRadius}px`,
           textDecoration: 'none',
+          position: 'relative',
+          zIndex: buttonZIndex,
         }}
       >
         {config.buttonText}
@@ -1407,6 +1430,7 @@ function ProductCarouselOverlay({
     const thumbnailSize = config.thumbnailSize || 64;
     const thumbnailClasses = getThumbnailClasses();
     const textAnimClass = getTextAnimationClass();
+    const thumbnailZIndex = config.buttonLayer === 'forward' ? 1 : 10;
     
     // Scroll mode: show only one element at a time
     if (config.enableScroll) {
@@ -1422,6 +1446,8 @@ function ProductCarouselOverlay({
               width: config.thumbnailShape === 'portrait' ? `${thumbnailSize * 0.75}px` : `${thumbnailSize}px`,
               height: `${thumbnailSize}px`,
               borderRadius: config.thumbnailShape === 'circle' ? '50%' : `${config.cornerRadius}px`,
+              position: 'relative',
+              zIndex: thumbnailZIndex,
             }}
           />
           <div className="flex-1 min-w-0 space-y-1">
@@ -1478,6 +1504,8 @@ function ProductCarouselOverlay({
             width: config.thumbnailShape === 'portrait' ? `${thumbnailSize * 0.75}px` : `${thumbnailSize}px`,
             height: `${thumbnailSize}px`,
             borderRadius: config.thumbnailShape === 'circle' ? '50%' : `${config.cornerRadius}px`,
+            position: 'relative',
+            zIndex: thumbnailZIndex,
           }}
         />
         <div className="flex-1 min-w-0 space-y-1">
@@ -1535,7 +1563,7 @@ function ProductCarouselOverlay({
       style={{ 
         ...getPositionStyles(),
         borderRadius: `${config.cornerRadius}px`,
-        maxWidth: `${minCarouselWidth}px`,
+        width: `min(95%, ${minCarouselWidth}px)`,
         padding: `${padding}px`
       }}
     >
