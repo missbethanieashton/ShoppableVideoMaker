@@ -37,6 +37,14 @@ The architecture is schema-first, ensuring data consistency. The application use
 - **Google Fonts / CDN Fonts**: Used for custom font families in carousel typography.
 
 ## Recent Changes
+- **Fixed Responsive Carousel Sizing in Embed Player** (October 22, 2025)
+  - **ROOT CAUSE**: Carousel used fixed pixel width (250px) while video could be any size
+  - On large videos (1000px+), 250px carousel appeared microscopic and unusable
+  - **FIX**: Changed to percentage-based width that scales with video size
+  - Formula: `(configuredWidth / 640) * 100%` with maxWidth cap and 150px minimum
+  - Example: 250px config = 39% of video width, capped at 250px max, minimum 150px
+  - Carousel now properly sized and visible on all video sizes
+
 - **Fixed Missing Add Product Dialog** (October 22, 2025)
   - Add Product and Publish dialogs were missing from JSX return statement
   - Dialog components now properly rendered, making "Add Product" button functional

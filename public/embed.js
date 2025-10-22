@@ -383,10 +383,16 @@
         ? Math.max(carouselWidth, thumbnailSize + (padding * 2) + thumbnailGap + 100)
         : Math.max(carouselWidth, thumbnailSize + (padding * 2));
       
+      // Calculate carousel size as percentage of video width for responsive scaling
+      // Base calculation: if config says 250px and we assume a 640px reference video,
+      // that's 39% of video width. Scale accordingly.
+      const referenceVideoWidth = 640; // Typical video width for sizing calculations
+      const carouselWidthPercent = (minCarouselWidth / referenceVideoWidth) * 100;
+      
       carousel.style.padding = `${padding}px`;
-      carousel.style.width = `${minCarouselWidth}px`;
-      carousel.style.maxWidth = 'none';
-      carousel.style.minWidth = `${minCarouselWidth}px`;
+      carousel.style.width = `${carouselWidthPercent}%`;
+      carousel.style.maxWidth = `${minCarouselWidth}px`; // Cap at configured pixel size
+      carousel.style.minWidth = `150px`; // Ensure minimum usable size
       carousel.style.borderRadius = `${config.cornerRadius}px`;
       carousel.style.pointerEvents = 'auto';
       carousel.style.zIndex = '1000';
