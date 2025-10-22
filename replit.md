@@ -35,3 +35,25 @@ The architecture is schema-first, ensuring data consistency. The application use
 - **Drizzle ORM**: Type-safe database interaction layer.
 - **Multer**: Middleware for handling multipart/form-data, primarily for file uploads.
 - **Google Fonts / CDN Fonts**: Used for custom font families in carousel typography.
+
+## Recent Changes
+- **Auto-Refreshing Embed Code** (October 22, 2025)
+  - Embed code now automatically refreshes after every save click
+  - Embed code section auto-expands to show updated code
+  - Timestamp display shows "Updated: [time]" for last refresh
+  - Toast notification confirms "Embed code updated with latest changes"
+  - All styling and modifications immediately reflected in embed code
+  - Ensures external websites always have latest configuration
+  
+- **Pixel Adjustment Controls with Negative Values** (October 22, 2025)
+  - Renamed thumbnailContentGap → thumbnailContentPadding
+  - Replaced sliders with number inputs (up/down arrows)
+  - All spacing controls support negative values for overlap effects
+  - Database migration completed for existing videos
+  - Input handlers use valueAsNumber for proper keyboard entry
+  
+- **Button Layering Feature** (October 22, 2025)
+  - Added Button Layer dropdown (Forward/Backward)
+  - Forward: Button appears on top (z-index: 10)
+  - Backward: Thumbnail appears on top (z-index: 10)
+  - Works in both editor preview and embedded player

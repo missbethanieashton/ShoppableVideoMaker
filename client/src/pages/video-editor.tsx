@@ -43,6 +43,7 @@ export default function VideoEditor() {
   const [resizingPlacement, setResizingPlacement] = useState<{ id: string; edge: 'left' | 'right' } | null>(null);
   const [savedVideo, setSavedVideo] = useState<Video | null>(null);
   const [embedCodeOpen, setEmbedCodeOpen] = useState(false);
+  const [lastSavedTime, setLastSavedTime] = useState<Date | null>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
 
   const isNew = params.id === "new";
@@ -224,9 +225,11 @@ export default function VideoEditor() {
         queryClient.invalidateQueries({ queryKey: ["/api/videos", params.id] });
       }
       setSavedVideo(data);
+      setLastSavedTime(new Date());
+      setEmbedCodeOpen(true); // Auto-open embed code section to show updated code
       toast({
         title: "Video saved",
-        description: "Your video has been saved successfully.",
+        description: "Embed code updated with latest changes.",
       });
       if (isNew && data?.id) {
         navigate(`/editor/${data.id}`);
@@ -421,7 +424,14 @@ export default function VideoEditor() {
                 className="w-full justify-between p-2 h-auto hover-elevate"
                 data-testid="button-toggle-embed-code"
               >
-                <span className="text-xs font-medium text-muted-foreground">Embed Code</span>
+                <div className="flex flex-col items-start">
+                  <span className="text-xs font-medium text-muted-foreground">Embed Code</span>
+                  {lastSavedTime && (
+                    <span className="text-xs text-muted-foreground/60">
+                      Updated: {lastSavedTime.toLocaleTimeString()}
+                    </span>
+                  )}
+                </div>
                 {embedCodeOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
               </Button>
             </CollapsibleTrigger>
